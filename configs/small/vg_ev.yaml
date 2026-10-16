@@ -1,0 +1,21 @@
+# Decision4Rec v3 pilot (docs/08_architecture_v3.md), Video Games: a source domain of Kev-Rec-E. The store reads the
+# training parts of every user (regime R1, full purchase data); candidates come from the store's own generators;
+# each option carries the store's statements. Development users (seed 13), as in the rt configs.
+name: vg_ev
+dataset: data/processed/video_games
+out: runs/small/vg
+retriever: {kind: evidence, tag: ev100}
+evidence: {frac: 1.0, seed: 0, days: 30}
+eval: {track: B, K: 30, n_test: 2000, n_valid: 1000, seed: 13, pool: 200, hist_len: 10}
+prompt: {max_facts: 3, item_chars: 60, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+item_text:
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/vg/retrieval
+reference: ev
+benchmark:
+  system: ev
+  report: [retriever, ev]
+  baselines: [pop, itemknn, seqrules, contentknn, transtext, gru4rec, sasrec, sasrecf]
+arms:
+- {name: retriever, method: retriever}
+- {name: ev, method: luce, m: 0, rounds: 2, evidence: stats}     # whole pool, two random orders, statements on

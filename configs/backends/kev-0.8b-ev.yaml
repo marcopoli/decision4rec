@@ -1,0 +1,5 @@
+# Kev-Rec-E: Kev-0.8B trained to read a store's evidence (stage ev_train_08, docs/08), served from its run folder:
+# uv run --extra serve python -m kev.serve --run runs/kev-0.8b-ev --port 8009
+tag: kev-0.8b-ev
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-0.8b-ev, api_key_env: KEV_API_KEY}

@@ -1,0 +1,5 @@
+# Rec-tuned Kev-4B: uv run --extra serve python -m kev.serve --run runs/kev-4b-rec-vg --port 8009
+# Change `name` when you serve a different checkpoint: the cache is keyed on it.
+tag: kev-4b-rec-vg
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-4b-rec-vg, api_key_env: KEV_API_KEY}

@@ -1,0 +1,5 @@
+# Kev-4B pool reader, variant rtmc (2026-10-13): reads 250 characters of item text (R19). Served from its run folder:
+# uv run --extra serve python -m kev.serve --run runs/kev-4b-rtmc --port 8009
+tag: kev-4b-rtmc
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-4b-rtmc, api_key_env: KEV_API_KEY}

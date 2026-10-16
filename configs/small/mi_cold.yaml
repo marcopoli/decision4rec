@@ -1,0 +1,42 @@
+# E3, new items (docs/03_architecture_v2.md, section 9). The dataset keeps the interactions before a time cutoff
+# (the 0.9 quantile of all times) and, as test target, the first interaction after it (`prepare-cold`). Test users
+# are those whose target is after the cutoff; their target is a new item (no training interaction) or a known one.
+# The pool mixes SASRec with text and knowledge agents, which can reach new items. Item facets come from E1.
+name: mi_cold
+dataset: data/processed/musical_instruments_cold
+out: runs/small/mi_cold
+retriever:
+  kind: multi
+  tag: multi
+  base: {kind: sasrec, path: runs/small/mi_cold/sasrec}
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  agents: [sequential, content, knowledge, collaborative, graph, popularity]
+  weights: tuned
+  tune_users: 500
+  depth: 200
+  cache: runs/small/mi_cold/retrieval
+eval: {track: B, K: 50, n_test: 2000, n_valid: 500, seed: 13, pool: 200, hist_len: 10, target: post}
+prompt: {max_facts: 3, item_chars: 300, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+facets:
+  schema: configs/facets/musical_instruments.yaml
+  dm: runs/small/mi/facets/kev-4b.jsonl
+  emb: runs/small/mi/facets/emb.jsonl
+item_text:
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/mi_cold/retrieval
+relations:          # typed relations of the last items; text neighbours can be new items, co-occurrence neighbours cannot
+  path: runs/small/mi_cold/relations/kev-4b.jsonl
+  last: 3
+  n_cooc: 10
+  n_content: 10
+  decay: 0.7
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/mi_cold/retrieval
+reference: wholepool@p0
+benchmark:
+  system: wholepool@p0
+  report: [retriever, wholepool@p0]
+  baselines: [pop, itemknn, seqrules, contentknn, transtext, gru4rec, sasrec, sasrecf, sasrecf_dm]
+arms:
+- {name: retriever, method: retriever}
+- {name: wholepool@p0, method: luce, m: 0, perm: 0}

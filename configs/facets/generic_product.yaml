@@ -1,0 +1,55 @@
+# Item facets for any product catalogue (used for Amazon Industrial and Scientific in E4). The questions do not
+# depend on the domain, which is the point of the generalization test.
+domain: products
+item_chars: 400
+threshold: 0.4
+questions:
+  - name: role
+    type: choice
+    instructions: What role does this product play for the buyer?
+    options:
+      main: A main product that is useful on its own
+      accessory: An accessory or add-on for another product
+      consumable: A consumable or refill that is used up
+      part: A spare or replacement part
+      kit: A kit, set or bundle of several items
+  - name: audience
+    type: choice
+    instructions: Who mainly buys this product?
+    options:
+      consumers: Consumers for personal or home use
+      professionals: Professionals, laboratories or businesses
+      students: Students, teachers or children
+      anyone: Anyone
+  - name: price_tier
+    type: choice
+    instructions: In which price range is this product, judging from its brand and description?
+    options:
+      budget: Budget
+      mid: Mid-range
+      premium: Premium
+  - name: context
+    type: choice
+    instructions: Where is this product mainly used?
+    options:
+      home: At home
+      work: At work, in a laboratory or a workshop
+      outdoor: Outdoors or while travelling
+      hobby: For a hobby, a craft or a sport
+      general: Anywhere, no specific place
+  - name: lifetime
+    type: choice
+    instructions: How long does this product usually last?
+    options:
+      single_use: It is used once
+      wears_out: It wears out and is bought again
+      durable: It lasts a long time
+  - name: needs_other
+    type: noul
+    instructions: This product only makes sense together with a specific other product that the buyer already owns.
+  - name: powered
+    type: noul
+    instructions: This product needs electricity or batteries to work.
+  - name: known_brand
+    type: noul
+    instructions: This product is made by a well-known brand.

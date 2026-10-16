@@ -1,0 +1,7 @@
+# R17 v3 (2026-10-15): LlamaRec-style reranker, Qwen3.5-0.8B-Base with adapters trained on the rtm records cut to
+# 5-option questions (stage llm_train_08 with LLM_TAG=llmb5-0.8b LLM_OPTIONS=5), read in-process through the
+# next-token probabilities of the option labels over blocks of 5 (configs *_rtmb5.yaml). v1 and v2 (30 options in one
+# question) did not learn. Stop the Kev server first. Plain prompt (no chat template) and no prefix cache, as in training.
+tag: llmb5-0.8b-rtm
+workers: 1
+backend: {kind: logit, model: "runs/llmb5-0.8b-rtm", dtype: bf16, batch_size: 1, use_chat_template: false, prefix_cache: false}

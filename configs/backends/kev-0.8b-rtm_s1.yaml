@@ -1,0 +1,5 @@
+# Kev-0.8B pool reader, variant rtm_s1 (2026-10-13): same records as rtm, Kev trainer seed 1 (R16). Served from its run folder:
+# uv run --extra serve python -m kev.serve --run runs/kev-0.8b-rtm_s1 --port 8009
+tag: kev-0.8b-rtm_s1
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-0.8b-rtm_s1, api_key_env: KEV_API_KEY}

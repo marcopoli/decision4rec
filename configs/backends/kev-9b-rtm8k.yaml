@@ -1,0 +1,6 @@
+# Kev-Rec, size curve (R21, 2026-10-15): Kev-9B trained like the 0.8B, 4B and 27B on the same 8,000 rtm records
+# (runs/small/rectune_choices_rtm8k), so the four sizes are compared on the same training data. Served from its run folder:
+# uv run --extra serve python -m kev.serve --run runs/kev-9b-rtm8k --port 8009
+tag: kev-9b-rtm8k
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-9b-rtm8k, api_key_env: KEV_API_KEY}

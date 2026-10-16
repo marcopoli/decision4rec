@@ -1,0 +1,9 @@
+# Rating prediction on synthetic data (oracle backend). score_compress emulates an over-cautious ordinal scale.
+name: synthetic_rating
+dataset: data/processed/synthetic
+out: runs/synthetic
+retriever: {kind: itemknn}
+backend: {kind: oracle, truth: data/processed/synthetic/truth.npz, score_compress: 0.5, cache: runs/synthetic/cache_rating.sqlite}
+eval: {track: B, K: 20, n_test: 150, n_valid: 80, seed: 13, pool: 100, hist_len: 10}
+arms:
+- {name: retriever, method: retriever}

@@ -1,0 +1,5 @@
+# Kev-0.8B pool reader, variant rtmfd (2026-10-13): 'found by' lines left out of 25% of the training records. Served from its run folder:
+# uv run --extra serve python -m kev.serve --run runs/kev-0.8b-rtmfd --port 8009
+tag: kev-0.8b-rtmfd
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-0.8b-rtmfd, api_key_env: KEV_API_KEY}

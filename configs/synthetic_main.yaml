@@ -1,0 +1,42 @@
+# The benchmark pipeline on synthetic data: baselines, the fixed system, and the joint table.
+name: synthetic_main
+dataset: data/processed/synthetic
+out: runs/synthetic
+retriever:
+  kind: multi
+  tag: multi
+  base: {kind: itemknn}
+  embedder: {kind: hashing}
+  writer: {kind: echo}
+  agents: [sequential, content, knowledge, collaborative, graph, popularity]
+  weights: tuned
+  tune_users: 150
+  cache: runs/synthetic/retrieval
+backend: {kind: oracle, truth: data/processed/synthetic/truth.npz, pos_bias: 0.3, outside_utility: 1.0, cache: runs/synthetic/cache_main.sqlite}
+eval: {track: B, K: 50, n_test: 150, n_valid: 80, seed: 13, pool: 100, hist_len: 10}
+# The agent on ActiveGraph is the primary system of the benchmark (stage `agent`). It compares the pool of K first,
+# with the block design of the batch system, and can add 15 candidates for at most two rounds. The routing mode,
+# the expansion threshold and the fusion weight are chosen on validation users. Declared before any test number.
+agent: {k0: 50, pool: 80, step: 15, max_rounds: 2, m: 10, rounds: 2, evidence: pref, routes: [tuned, decision],
+        agents: [sequential, content, knowledge, collaborative, profile, graph, popularity]}
+reference: wholepool@p0
+benchmark:
+  system: decision4rec+fuse
+  report: [retriever, wholepool@p0, luce_m10_r2, decision4rec]
+  baselines: [pop, itemknn, bprmf, gru4rec, sasrec, sasrecf]
+  grids:
+    bprmf:
+    - {d: 32, lr: 0.003, epochs: 20, patience: 4}
+    gru4rec:
+    - {d: 32, lr: 0.003, epochs: 20, patience: 4}
+    sasrec:
+    - {d: 32, lr: 0.003, epochs: 20, patience: 4}
+    sasrecf:
+    - {d: 32, lr: 0.003, epochs: 20, patience: 4}
+arms:
+- {name: retriever, method: retriever}
+- {name: wholepool@p0, method: luce, m: 0, perm: 0}
+- {name: prior, method: luce, m: 0, perm: 0, null_state: true}
+- {name: luce_m10_r2, method: luce, m: 10, rounds: 2}
+- {name: decision4rec, method: luce, m: 10, rounds: 2, outside: true, profile: decision, evidence: pref, intent: true}
+- {name: graph, method: graph}

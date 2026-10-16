@@ -1,0 +1,53 @@
+# Large setting, confirmatory. The system is frozen after the small setting: do not edit `arms` or `benchmark.system`.
+# 5,000 sampled test users for the decision model; baselines are also scored on every user of the dataset.
+# Control arms (`prior`, `decision4rec_masked`) run on the first 1,000 cases.
+# Baselines: at most 300 epochs, early stopping after 10 validations (RecBole defaults), LightGCN up to 1,000.
+# One or two configurations per model and a batch of 8,192 for the pairwise models, to keep the stage tractable.
+name: movies_main
+dataset: data/processed/movies_tv
+out: runs/large/movies
+retriever:
+  kind: multi
+  tag: multi
+  base: {kind: sasrec, path: runs/large/movies/sasrec}
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  writer: {kind: hf, model: Qwen/Qwen2.5-1.5B-Instruct, max_new_tokens: 48, batch_size: 16}
+  agents: [sequential, content, knowledge, collaborative, graph, popularity]
+  weights: tuned
+  tune_users: 500
+  depth: 200
+  cache: runs/large/movies/retrieval
+eval: {track: B, K: 50, n_test: 5000, n_valid: 500, seed: 13, pool: 200, hist_len: 10}
+prompt: {max_facts: 3, item_chars: 300, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+# The agent on ActiveGraph is the primary system of the benchmark (stage `agent`). It compares the pool of K first,
+# with the block design of the batch system, and can add 15 candidates for at most two rounds. The routing mode,
+# the expansion threshold and the fusion weight are chosen on validation users. Declared before any test number.
+agent: {k0: 50, pool: 80, step: 15, max_rounds: 2, m: 10, rounds: 2, evidence: pref, routes: [tuned, decision],
+        agents: [sequential, content, knowledge, collaborative, profile, graph, popularity]}
+reference: wholepool@p0
+benchmark:
+  system: decision4rec+fuse
+  report: [retriever, wholepool@p0, luce_m10_r2, decision4rec]
+  baselines: [pop, itemknn, bprmf, lightgcn, gru4rec, sasrec, sasrecf, bert4rec]
+  grids:
+    bprmf:
+    - {d: 64, lr: 0.001, reg: 1.0e-05, batch_size: 8192}
+    lightgcn:
+    - {d: 64, lr: 0.001, layers: 3, reg: 0.0001, batch_size: 8192, epochs: 1000}
+    gru4rec:
+    - {d: 64, lr: 0.001, dropout: 0.2}
+    sasrec:
+    - {d: 64, lr: 0.001, dropout: 0.2, n_blocks: 2}
+    - {d: 128, lr: 0.001, dropout: 0.3, n_blocks: 2}
+    sasrecf:
+    - {d: 64, lr: 0.001, dropout: 0.2, n_blocks: 2}
+    bert4rec:
+    - {d: 64, lr: 0.001, dropout: 0.2, n_blocks: 2, mask_prob: 0.3}
+arms:
+- {name: retriever, method: retriever}
+- {name: wholepool@p0, method: luce, m: 0, perm: 0}
+- {name: luce_m10_r2, method: luce, m: 10, rounds: 2}
+- {name: decision4rec, method: luce, m: 10, rounds: 2, outside: true, profile: decision, evidence: pref, intent: true}
+- {name: graph, method: graph}
+- {name: prior, method: luce, m: 0, perm: 0, null_state: true, max_cases: 1000}
+- {name: decision4rec_masked, method: luce, mask_titles: true, max_cases: 1000, m: 10, rounds: 2, outside: true, profile: decision, evidence: pref, intent: true}

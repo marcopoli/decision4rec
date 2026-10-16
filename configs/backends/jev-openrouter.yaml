@@ -1,0 +1,6 @@
+# Hosted Jev through OpenRouter. export OPENROUTER_API_KEY=... before running.
+tag: jev-1.13-openrouter
+workers: 8
+price_per_mtok: 0.042
+backend: {kind: systemone, base_url: "https://openrouter.ai/api", model: typesafe/jev-1.13, name: jev-1.13-openrouter,
+          api_key_env: OPENROUTER_API_KEY, max_request_chars: 90000}

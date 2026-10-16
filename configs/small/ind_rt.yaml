@@ -1,0 +1,22 @@
+# Decision4Rec-T in a domain with no training data for the decision model (docs/07_decision4rec_t.md). Kev-Rec is trained
+# on Video Games, Musical Instruments and Steam only, never on this domain. It reorders the top 30 of content KNN
+# (item text only), and the final score fuses both with one weight fitted on validation users. The trained
+# baselines use all the training data of this domain: they are references, not competitors at zero data.
+# Development users (seed 13). Prompt settings are those of the training records (`export-choices`).
+name: ind_rt
+dataset: data/processed/industrial_scientific
+out: runs/small/ind
+retriever: {kind: baseline, model: contentknn, ref: configs/small/ind_semantic.yaml, tag: contentknn}
+eval: {track: B, K: 30, n_test: 2000, n_valid: 1000, seed: 13, pool: 200, hist_len: 10}
+prompt: {max_facts: 3, item_chars: 90, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+item_text:
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/ind/retrieval
+reference: rt
+benchmark:
+  system: rt
+  report: [retriever, rt]
+  baselines: [pop, contentknn, transtext, sasrec, sasrecf]
+arms:
+- {name: retriever, method: retriever}
+- {name: rt, method: luce, m: 0, rounds: 2}     # whole pool, two random orders in one request
