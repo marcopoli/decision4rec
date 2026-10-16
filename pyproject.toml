@@ -1,0 +1,31 @@
+[project]
+name = "decision4rec"
+version = "0.1.0"
+description = "Decision models on knowledge and active graphs for multi-agent recommender systems"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [{name = "Marco Polignano"}, {name = "Het Darshan Mehta"}, {name = "Pasquale Lops"}, {name = "Ernesto William De Luca"}, {name = "Giovanni Semeraro"}]
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.24", "pyyaml>=6", "tqdm>=4.60"]
+
+[project.optional-dependencies]
+train = ["torch>=2.1"]
+logit = ["torch>=2.1", "transformers>=4.44"]
+active = ["activegraph>=1.12"]
+dev = ["pytest>=8"]
+
+[project.urls]
+Repository = "https://github.com/marcopoli/decision4rec"
+
+[project.scripts]
+decision4rec = "decision4rec.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["decision4rec*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

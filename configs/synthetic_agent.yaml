@@ -1,0 +1,18 @@
+# Agent study and audit on synthetic data (oracle backend).
+name: synthetic_agent
+dataset: data/processed/synthetic
+out: runs/synthetic
+retriever: {kind: itemknn}
+backend: {kind: oracle, truth: data/processed/synthetic/truth.npz, pos_bias: 0.35, similarity: 0.3, noise: 0.0, outside_utility: 2.0, cache: runs/synthetic/cache_agent.sqlite}
+eval: {track: B, K: 50, n_test: 120, n_valid: 60, seed: 13, pool: 100, hist_len: 10}
+agent: {k0: 20, step: 15, max_rounds: 2, m: 5, rounds: 2, evidence: pref}
+arms:
+- {name: retriever, method: retriever}
+retrieval_agents:
+  embedder: {kind: hashing}
+  writer: {kind: echo}
+  agents: [sequential, content, knowledge, collaborative, profile, graph, popularity]
+  weights: tuned
+  tune_users: 150
+  pool: 50
+  cache: runs/synthetic/retrieval

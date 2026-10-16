@@ -1,0 +1,5 @@
+# Kev-0.8B pool reader, variant rtmml (2026-10-13): trained also on cross-fitted MovieLens-1M records (dense source domain). Served from its run folder:
+# uv run --extra serve python -m kev.serve --run runs/kev-0.8b-rtmml --port 8009
+tag: kev-0.8b-rtmml
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-0.8b-rtmml, api_key_env: KEV_API_KEY}

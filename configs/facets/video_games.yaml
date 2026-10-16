@@ -1,0 +1,84 @@
+# Item facets for Amazon Video Games, answered once per item by a decision model (E1, docs/03_architecture_v2.md
+# section 9). Every question can be decided from the product text and general knowledge. `match` lists words of
+# the raw metadata that name an option; they are used only to check the answers, never as input.
+domain: video games
+item_chars: 400
+threshold: 0.4          # a choice facet becomes an attribute only if its most likely option has at least this probability
+questions:
+  - name: kind
+    type: choice
+    instructions: What kind of product is described in the state?
+    options:
+      game: A video game, physical or digital
+      addon: Downloadable content, season pass, in-game currency, subscription or game card
+      console: A game console or handheld system
+      controller: A controller, joystick, steering wheel or other input device
+      accessory: Another accessory, such as a headset, charger, cable, case, storage, stand or skin
+      other: Something else, such as merchandise, a strategy guide or a collectible
+  - name: platform
+    type: choice
+    instructions: For which platform is this product made?
+    options:
+      playstation: Sony PlayStation of any generation, including PSP and PS Vita
+      xbox: Microsoft Xbox of any generation
+      switch: Nintendo Switch
+      nintendo_old: An older Nintendo system, such as Wii, Wii U, DS, 3DS, GameCube or Game Boy
+      pc: PC or Mac
+      multi: Several platforms, or not specific to one platform
+    match:
+      playstation: [playstation, ps2, ps3, ps4, ps5, psp, ps vita]
+      xbox: [xbox]
+      switch: [nintendo switch]
+      nintendo_old: [wii, nintendo ds, 3ds, gamecube, game boy, nintendo 64]
+      pc: [pc, mac, windows]
+  - name: genre
+    type: choice
+    instructions: Which genre fits this product best?
+    options:
+      action_adventure: Action or adventure
+      shooter: Shooter
+      rpg: Role-playing
+      sports: Sports
+      racing: Racing or driving
+      strategy_sim: Strategy or simulation
+      fighting: Fighting
+      family_party: Family, party, puzzle, music or casual
+      not_a_game: Not a game
+  - name: audience
+    type: choice
+    instructions: For which audience is this product mainly made?
+    options:
+      children: Young children
+      teens: Teenagers
+      adults: Adults, including mature content
+      everyone: Everyone
+  - name: play_mode
+    type: choice
+    instructions: How is this product mainly played or used?
+    options:
+      single: Mainly single player
+      online: Mainly online multiplayer
+      local: Local multiplayer or party play in the same room
+      not_applicable: Not a game, or no clear mode
+  - name: depth
+    type: choice
+    instructions: How demanding is this product for the player?
+    options:
+      casual: Casual, easy to pick up
+      mid: Moderate
+      hardcore: Demanding, long or competitive
+      not_applicable: Not a game
+  - name: era
+    type: choice
+    instructions: When was this product most likely first released?
+    options:
+      before_2005: Before 2005
+      y2005_2012: Between 2005 and 2012
+      y2013_2019: Between 2013 and 2019
+      after_2019: In 2020 or later
+  - name: franchise
+    type: noul
+    instructions: This product belongs to a well-known game series or franchise.
+  - name: special_edition
+    type: noul
+    instructions: This product is a special, limited, collector's or bundle edition.

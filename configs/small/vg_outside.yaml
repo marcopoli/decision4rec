@@ -1,0 +1,17 @@
+# Small setting, RQ3: outside option on the retriever's top 20 as is. Also used by the rating study (appendix).
+name: vg_outside
+dataset: data/processed/video_games
+out: runs/small/vg
+retriever: {kind: sasrec, path: runs/small/vg/sasrec}
+eval: {track: B, K: 20, n_test: 1000, n_valid: 300, seed: 13, pool: 200, hist_len: 10}
+prompt: {max_facts: 3, item_chars: 400, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+reference: wholepool@p0
+rating:
+  variants: [rated, unrated, 'null', profile]
+arms:
+- {name: retriever, method: retriever}
+- {name: wholepool@p0, method: luce, m: 0, perm: 0}
+- {name: wholepool_out, method: luce, m: 0, perm: 0, outside: true}
+- {name: luce_m5_r2, method: luce, m: 5, rounds: 2}
+- {name: luce_m5_r2_out, method: luce, m: 5, rounds: 2, outside: true}
+- {name: luce_m5_r3_out, method: luce, m: 5, rounds: 3, outside: true}

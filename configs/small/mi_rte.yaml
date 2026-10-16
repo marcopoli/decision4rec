@@ -1,0 +1,22 @@
+# Decision4Rec rte (docs/08, section 'One model over the trained pool'): the decision model reorders the top 30 of the
+# trained SASRecF and reads, for every option, the item text and the store's behavioural statements; the final
+# score fuses it with SASRecF (weight fitted on validation users). A source domain of Kev-Rec-ES. Development users (seed 13), the
+# same cases as the rt config (retriever tag sasrecf), so rt and rte are paired.
+name: mi_rte
+dataset: data/processed/musical_instruments
+out: runs/small/mi
+retriever: {kind: baseline, model: sasrecf, ref: configs/small/mi_semantic.yaml, tag: sasrecf}
+eval: {track: B, K: 30, n_test: 2000, n_valid: 1000, seed: 13, pool: 200, hist_len: 10}
+evidence: {frac: 1.0, seed: 0, days: 30, fusion: [1, 1, 0.6, 0.3]}
+prompt: {max_facts: 3, item_chars: 90, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+item_text:
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/mi/retrieval
+reference: rte
+benchmark:
+  system: rte
+  report: [retriever, rte]
+  baselines: [gru4rec, sasrec, sasrecf, seqrules, contentknn, transtext]
+arms:
+- {name: retriever, method: retriever}
+- {name: rte, method: luce, m: 0, rounds: 2, evidence: stats}     # whole pool, two random orders, statements on

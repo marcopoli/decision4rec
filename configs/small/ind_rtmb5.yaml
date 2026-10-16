@@ -1,0 +1,25 @@
+# R17 v3 (2026-10-15): as ind_rtm, but the 30 best of the pool are asked in blocks of 5 (two random partitions, 12
+# questions per user) and combined by the Luce fit, for the LlamaRec-style reranker trained on 5-option questions
+# (stage llm_train_08 with LLM_OPTIONS=5, backend llmb5-0.8b-rtm). The users, pool and statements are those of ind_rtm.
+# Decision4Rec rtm (paper Section 4.6): the full architecture. A multi-agent pool (SASRecF as one agent, the agents of the
+# knowledge graph of the scenario, popularity) ranked by a residual fast ranker; the decision model reads the 30 best
+# with item text, statements and the agents that found them, and is fused with the ranker on validation users.
+name: ind_rtmb5
+dataset: data/processed/industrial_scientific
+out: runs/small/ind
+retriever: {kind: pool, tag: pool}
+pool: {ref: configs/small/ind_semantic.yaml, model: sasrecf, users: 15000, seed: 11}
+eval: {track: B, K: 30, n_test: 2000, n_valid: 1000, seed: 13, pool: 200, hist_len: 10}
+evidence: {frac: 1.0, seed: 0, days: 30, fusion: [1, 1, 0.6, 0.3]}
+prompt: {max_facts: 3, item_chars: 90, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+item_text:
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/ind/retrieval
+reference: rtmb5
+benchmark:
+  system: rtmb5
+  report: [retriever, rtmb5]
+  baselines: [pop, seqrules, contentknn, transtext, sasrec, sasrecf]
+arms:
+- {name: retriever, method: retriever}
+- {name: rtmb5, method: luce, m: 5, rounds: 2, evidence: stats+found}     # 30 best of the pool, statements and the agents that found each item

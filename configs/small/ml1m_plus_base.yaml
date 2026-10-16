@@ -1,0 +1,135 @@
+# MovieLens-1M enriched (data/processed/ml1m_plus): the trained and training-free baselines on the enriched items.
+# SASRecF reads the richer attributes (director, cast, writer, studio, series, ...), so it is trained again here;
+# it is the bar of this domain and the SASRecF agent of the multi-agent pool (configs ml1m_plus_*.yaml).
+# Baselines read from the full grid (runs/tune, trained on .13, 2026-10-11).
+name: ml1m_plus_base
+dataset: data/processed/ml1m_plus
+out: runs/small/ml1m_plus
+retriever:
+  kind: itemknn
+  tag: itemknn
+eval:
+  track: B
+  K: 30
+  n_test: 2000
+  n_valid: 1000
+  seed: 13
+  pool: 200
+  hist_len: 10
+prompt:
+  max_facts: 3
+  item_chars: 90
+  profile_hist: 30
+  max_hypotheses: 24
+  max_intents: 10
+item_text:
+  embedder:
+    kind: hf
+    model: BAAI/bge-small-en-v1.5
+    pooling: cls
+    query_prefix: 'Represent this sentence for searching relevant passages: '
+  cache: runs/small/ml1m_plus/retrieval
+benchmark:
+  baselines:
+  - pop
+  - itemknn
+  - seqrules
+  - contentknn
+  - transtext
+  - gru4rec
+  - sasrec
+  - sasrecf
+  common_hp:
+    max_len: 200
+  root: runs/tune/ml1m_plus/baselines
+  grids:
+    sasrecf: &id001
+    - d: 64
+      lr: 0.001
+      dropout: 0.2
+      n_blocks: 2
+    - d: 64
+      lr: 0.001
+      dropout: 0.5
+      n_blocks: 2
+    - d: 128
+      lr: 0.001
+      dropout: 0.2
+      n_blocks: 2
+    - d: 128
+      lr: 0.001
+      dropout: 0.5
+      n_blocks: 2
+    - d: 256
+      lr: 0.001
+      dropout: 0.2
+      n_blocks: 2
+    - d: 256
+      lr: 0.001
+      dropout: 0.5
+      n_blocks: 2
+    - d: 128
+      lr: 0.001
+      dropout: 0.3
+      n_blocks: 2
+    - d: 128
+      lr: 0.001
+      dropout: 0.2
+      n_blocks: 3
+    - d: 128
+      lr: 0.001
+      dropout: 0.5
+      n_blocks: 3
+    sasrec: *id001
+    gru4rec:
+    - d: 64
+      lr: 0.001
+      dropout: 0.2
+    - d: 64
+      lr: 0.001
+      dropout: 0.3
+    - d: 64
+      lr: 0.001
+      dropout: 0.5
+    - d: 128
+      lr: 0.001
+      dropout: 0.2
+    - d: 128
+      lr: 0.001
+      dropout: 0.3
+    - d: 128
+      lr: 0.001
+      dropout: 0.5
+    - d: 256
+      lr: 0.001
+      dropout: 0.2
+    - d: 256
+      lr: 0.001
+      dropout: 0.3
+    - d: 256
+      lr: 0.001
+      dropout: 0.5
+    bert4rec:
+    - d: 64
+      lr: 0.001
+      dropout: 0.2
+      n_blocks: 2
+      mask_prob: 0.3
+    - d: 64
+      lr: 0.001
+      dropout: 0.2
+      n_blocks: 2
+      mask_prob: 0.5
+    - d: 128
+      lr: 0.001
+      dropout: 0.2
+      n_blocks: 2
+      mask_prob: 0.3
+    - d: 128
+      lr: 0.001
+      dropout: 0.2
+      n_blocks: 2
+      mask_prob: 0.5
+arms:
+- name: retriever
+  method: retriever

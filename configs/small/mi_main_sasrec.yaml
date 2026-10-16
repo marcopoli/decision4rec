@@ -1,0 +1,16 @@
+# Small setting, RQ2 ablation: the same system on a pool from SASRec alone (no retrieval agents).
+name: mi_main_sasrec
+dataset: data/processed/musical_instruments
+out: runs/small/mi
+retriever: {kind: sasrec, path: runs/small/mi/sasrec}
+eval: {track: B, K: 50, n_test: 1000, n_valid: 300, seed: 13, pool: 200, hist_len: 10}
+prompt: {max_facts: 3, item_chars: 300, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+reference: wholepool@p0
+benchmark:
+  system: decision4rec+fuse
+  report: [retriever, wholepool@p0, decision4rec]
+  baselines: [pop, itemknn, bprmf, lightgcn, gru4rec, sasrec, sasrecf, bert4rec]
+arms:
+- {name: retriever, method: retriever}
+- {name: wholepool@p0, method: luce, m: 0, perm: 0}
+- {name: decision4rec, method: luce, m: 10, rounds: 2, outside: true, profile: decision, evidence: pref, intent: true}

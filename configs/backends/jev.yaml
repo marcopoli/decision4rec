@@ -1,0 +1,7 @@
+# Hosted Jev (optional reference). export TYPESAFE_API_KEY=... before running.
+# Pinned version for reproducibility. Read the vendor terms before publishing numbers.
+tag: jev-1.13.0
+workers: 8
+price_per_mtok: 0.042
+backend: {kind: systemone, base_url: "https://api.typesafe.ai", model: jev-1.13.0, name: jev-1.13.0,
+          api_key_env: TYPESAFE_API_KEY, max_request_chars: 90000}

@@ -1,0 +1,35 @@
+# E4 generalization: the same experiment as vg_semantic.yaml on another domain.
+# E1 and E2 of the semantic layer (docs/03_architecture_v2.md, section 9): item facets and item-pair relations
+# answered by Kev-4B. Same users as the RQ2 ablation on the SASRec top 50 (seed 13), so the trained baselines
+# and earlier results apply. Stages e1_facets and e2_relations in scripts/setting.sh.
+name: steam_semantic
+dataset: data/processed/steam
+out: runs/small/steam
+retriever: {kind: sasrec, path: runs/small/steam/sasrec}
+eval: {track: B, K: 50, n_test: 1000, n_valid: 300, seed: 13, pool: 200, hist_len: 10}
+prompt: {max_facts: 3, item_chars: 300, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+facets:
+  schema: configs/facets/video_games.yaml
+  dm: runs/small/steam/facets/kev-4b.jsonl
+  emb: runs/small/steam/facets/emb.jsonl
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/steam/retrieval
+relations:
+  path: runs/small/steam/relations/kev-4b.jsonl
+  last: 3            # anchors: the last three history items of each validation and test user
+  n_cooc: 10         # candidates per anchor: strongest co-occurrence neighbours in the training sequences
+  n_content: 10      # and nearest neighbours by item text
+  decay: 0.7
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/steam/retrieval
+item_text:          # text embeddings for the training-free baselines contentknn and transtext
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/steam/retrieval
+benchmark:
+  # shortcut baselines (sequential rules, content KNN, transition graph plus text) are required by recent critiques
+  baselines: [sasrec, sasrecf, sasrecf_dm, sasrec_dm, sasrecf_emb, seqrules, contentknn, transtext]
+  seeds: {sasrecf: [13, 14, 15], sasrecf_dm: [13, 14, 15]}   # the decisive comparison of E1, three training seeds
+reference: wholepool@p0
+arms:
+- {name: retriever, method: retriever}
+- {name: wholepool@p0, method: luce, m: 0, perm: 0}

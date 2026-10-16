@@ -1,0 +1,24 @@
+# Synthetic end-to-end run with the oracle backend. No model, no GPU.
+# The oracle has position bias and a similarity-driven IIA violation switched on,
+# so every analysis path of the report is exercised.
+name: synthetic_oracle
+dataset: data/processed/synthetic
+out: runs/synthetic
+retriever: {kind: itemknn}
+backend: {kind: oracle, truth: data/processed/synthetic/truth.npz, temperature: 1.0, pos_bias: 0.35, similarity: 0.3, noise: 0.2, outside_utility: 0.5, cache: runs/synthetic/cache.sqlite}
+eval: {track: B, K: 20, n_test: 150, n_valid: 80, seed: 13, pool: 100, hist_len: 10}
+reference: wholepool@p0
+arms:
+- {name: retriever, method: retriever}
+- {name: pointwise, method: pointwise}
+- {name: wholepool@p0, method: luce, m: 0, perm: 0}
+- {name: wholepool@p1, method: luce, m: 0, perm: 1}
+- {name: wholepool@p2, method: luce, m: 0, perm: 2}
+- {name: prior, method: luce, m: 0, perm: 0, null_state: true}
+- {name: luce_m5_r1, method: luce, m: 5, rounds: 1}
+- {name: luce_m5_r3, method: luce, m: 5, rounds: 3}
+- {name: luce_m5_r3_out, method: luce, m: 5, rounds: 3, outside: true}
+- {name: luce_m5_r2_a1, method: luce, m: 5, rounds: 2, adaptive: 1}
+- {name: luce_m5_r3_count, method: luce, m: 5, rounds: 3, evidence: kg+cf, profile: count}
+- {name: graph, method: graph}
+- {name: luce_m5_r3_um, method: luce, m: 5, rounds: 3, evidence: pref+cf, profile: decision, intent: true}

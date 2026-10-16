@@ -1,0 +1,5 @@
+# Generative LLM read through exact next-token probabilities (the Qwen baseline of arXiv:2609.40241).
+# Stop the Kev server first: both do not fit in 24 GB.
+tag: qwen2.5-7b
+workers: 1
+backend: {kind: logit, model: "Qwen/Qwen2.5-7B-Instruct", dtype: bf16, batch_size: 2, prefix_cache: true}

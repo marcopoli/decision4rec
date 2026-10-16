@@ -1,0 +1,7 @@
+# Kev-Rec, data-matched size run (2026-10-15): Kev-0.8B trained like kev-0.8b-rtm but on a fixed random subset of
+# 8,000 of its records (scripts/subset_records.py, seed 2026; runs/small/rectune_choices_rtm8k), so the 0.8B, 4B
+# and 27B decision models are compared on the same training data. Served from its run folder:
+# uv run --extra serve python -m kev.serve --run runs/kev-0.8b-rtm8k --port 8009
+tag: kev-0.8b-rtm8k
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-0.8b-rtm8k, api_key_env: KEV_API_KEY}

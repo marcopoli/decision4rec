@@ -1,0 +1,7 @@
+# R17 v2 (2026-10-15): LlamaRec-style reranker started from the post-trained Qwen/Qwen3.5-0.8B (revision 2fc06364715b),
+# adapters trained on the rtm records (stage llm_train_08 with LLM_TAG=llmi-0.8b), read in-process through the
+# next-token probabilities of the option labels. v1 (llm-0.8b-rtm, from the base model) did not learn.
+# Stop the Kev server first. Plain prompt (no chat template) and no prefix cache, exactly as in training.
+tag: llmi-0.8b-rtm
+workers: 1
+backend: {kind: logit, model: "runs/llmi-0.8b-rtm", dtype: bf16, batch_size: 1, use_chat_template: false, prefix_cache: false}

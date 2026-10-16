@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use Decision4Rec, please cite it as below."
+title: "Decision4Rec: A Jev-Inspired Framework of Decision Models on Knowledge and Active Graphs for Multi-Agent Recommender Systems"
+type: software
+license: Apache-2.0
+repository-code: "https://github.com/marcopoli/decision4rec"
+authors:
+  - family-names: Polignano
+    given-names: Marco
+    affiliation: "University of Bari Aldo Moro"
+  - family-names: Mehta
+    given-names: Het Darshan
+    affiliation: "Otto von Guericke University Magdeburg; Georg Eckert Institute"
+  - family-names: Lops
+    given-names: Pasquale
+    affiliation: "University of Bari Aldo Moro"
+  - family-names: De Luca
+    given-names: Ernesto William
+    affiliation: "Otto von Guericke University Magdeburg; Georg Eckert Institute"
+  - family-names: Semeraro
+    given-names: Giovanni
+    affiliation: "University of Bari Aldo Moro"

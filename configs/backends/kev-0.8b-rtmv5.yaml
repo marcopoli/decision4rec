@@ -1,0 +1,5 @@
+# Kev-0.8B pool reader, variant rtmv5 (2026-10-13): with the 'why' question of perspectives version 5. Served from its run folder:
+# uv run --extra serve python -m kev.serve --run runs/kev-0.8b-rtmv5 --port 8009
+tag: kev-0.8b-rtmv5
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-0.8b-rtmv5, api_key_env: KEV_API_KEY}

@@ -1,0 +1,30 @@
+# Large setting, RQ2 ablation: the same system on a pool from SASRec alone.
+name: ml20m_main_sasrec
+dataset: data/processed/ml20m
+out: runs/large/ml20m
+retriever: {kind: sasrec, path: runs/large/ml20m/sasrec}
+eval: {track: B, K: 50, n_test: 5000, n_valid: 500, seed: 13, pool: 200, hist_len: 10}
+prompt: {max_facts: 3, item_chars: 300, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+reference: wholepool@p0
+benchmark:
+  system: decision4rec+fuse
+  report: [retriever, decision4rec]
+  baselines: [pop, itemknn, bprmf, lightgcn, gru4rec, sasrec, sasrecf, bert4rec]
+  common_hp: {max_len: 200, batch_size: 128}
+  grids:
+    bprmf:
+    - {d: 64, lr: 0.001, reg: 1.0e-05, batch_size: 8192}
+    lightgcn:
+    - {d: 64, lr: 0.001, layers: 3, reg: 0.0001, batch_size: 8192, epochs: 1000}
+    gru4rec:
+    - {d: 64, lr: 0.001, dropout: 0.2}
+    sasrec:
+    - {d: 64, lr: 0.001, dropout: 0.2, n_blocks: 2}
+    - {d: 128, lr: 0.001, dropout: 0.3, n_blocks: 2}
+    sasrecf:
+    - {d: 64, lr: 0.001, dropout: 0.2, n_blocks: 2}
+    bert4rec:
+    - {d: 64, lr: 0.001, dropout: 0.2, n_blocks: 2, mask_prob: 0.3}
+arms:
+- {name: retriever, method: retriever}
+- {name: decision4rec, method: luce, m: 10, rounds: 2, outside: true, profile: decision, evidence: pref, intent: true}

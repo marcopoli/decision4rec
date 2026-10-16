@@ -1,0 +1,74 @@
+# Item facets for Amazon Musical Instruments, answered once per item by a decision model (E1,
+# docs/03_architecture_v2.md section 9). `match` lists words of the raw metadata that name an option; they are
+# used only to check the answers, never as input.
+domain: musical instruments
+item_chars: 400
+threshold: 0.4
+questions:
+  - name: kind
+    type: choice
+    instructions: What kind of product is described in the state?
+    options:
+      instrument: A playable musical instrument
+      consumable: A consumable part, such as strings, picks, reeds, drumsticks, drum heads, oil or cleaning products
+      amplifier: An amplifier or speaker for instruments
+      effect: An effect pedal or sound processor
+      recording: Recording or listening gear, such as a microphone, audio interface, studio monitor or headphones
+      support: A cable, connector, stand, mount, case, gig bag or strap
+      electronics: A tuner, metronome, power supply, wireless system or other small electronic device
+      learning: A book, lesson, sheet music or other learning material
+      other: Something else
+  - name: family
+    type: choice
+    instructions: Which instrument family is this product for?
+    options:
+      guitar: Acoustic, electric or classical guitar
+      bass: Bass guitar
+      keyboard: Piano, keyboard, synthesizer, organ or MIDI controller
+      drums: Drums or percussion
+      wind_brass: Wind or brass instruments
+      bowed: Violin, viola, cello or double bass
+      folk: Ukulele, banjo, mandolin, harmonica or another folk instrument
+      studio_live: DJ, studio or live sound, not tied to one instrument
+      general: Any instrument
+    match:
+      bass: [bass guitar, bass guitars]
+      keyboard: [keyboard, keyboards, piano, synthesizer, midi]
+      drums: [drum, drums, percussion]
+      wind_brass: [wind, brass, saxophone, trumpet, clarinet, flute]
+      bowed: [violin, viola, cello, string instruments]
+      folk: [ukulele, ukuleles, banjo, mandolin, harmonica]
+      studio_live: [dj, studio, live sound, recording]
+  - name: skill
+    type: choice
+    instructions: For which player level is this product mainly made?
+    options:
+      beginner: Beginners or students
+      intermediate: Intermediate players or hobbyists
+      professional: Professionals
+      any: Any level
+  - name: price_tier
+    type: choice
+    instructions: In which price range is this product, judging from its brand and description?
+    options:
+      budget: Budget
+      mid: Mid-range
+      premium: Premium
+  - name: use
+    type: choice
+    instructions: Where is this product mainly used?
+    options:
+      practice: Practice at home
+      live: Live performance
+      studio: Studio recording
+      teaching: Teaching or children
+      general: Anywhere, no specific use
+  - name: repeat_purchase
+    type: noul
+    instructions: Buyers usually need to buy this product again after some time, because it is used up or wears out.
+  - name: needs_other
+    type: noul
+    instructions: This product only makes sense together with a specific instrument or device that the buyer already owns.
+  - name: powered
+    type: noul
+    instructions: This product needs electricity or batteries to work.

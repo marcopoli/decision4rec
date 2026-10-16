@@ -1,0 +1,4 @@
+# Local Kev-4B server: uv run --extra serve python -m kev.serve --run jaredpalmer/kev-4b --port 8009
+tag: kev-4b
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-4b, api_key_env: KEV_API_KEY}

@@ -1,0 +1,5 @@
+# Kev-27B, for machines with about 70 GB of free memory or more (for example a Mac Studio with unified memory).
+# Server: uv run --extra serve python -m kev.serve --run jaredpalmer/kev-27b --port 8009
+tag: kev-27b
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-27b, api_key_env: KEV_API_KEY}

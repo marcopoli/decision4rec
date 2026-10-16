@@ -1,0 +1,17 @@
+# Multi-agent retrieval on synthetic data: hashing embedder and echo writer stand in for the small language models.
+name: synthetic_retrieval
+dataset: data/processed/synthetic
+out: runs/synthetic
+retriever:
+  kind: multi
+  tag: multi
+  base: {kind: itemknn}
+  embedder: {kind: hashing}
+  writer: {kind: echo}
+  agents: [sequential, content, knowledge, collaborative, graph, popularity]
+  weights: tuned
+  tune_users: 150
+  cache: runs/synthetic/retrieval
+eval: {track: B, K: 20, n_test: 150, n_valid: 80, seed: 13, pool: 100, hist_len: 10}
+arms:
+- {name: retriever, method: retriever}

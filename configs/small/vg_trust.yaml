@@ -1,0 +1,27 @@
+# Small setting, RQ3: target guaranteed in a 20-item set (comparable with arXiv:2609.40241).
+# Order sensitivity, calibration, user-model quality, memorisation controls.
+name: vg_trust
+dataset: data/processed/video_games
+out: runs/small/vg
+retriever: {kind: sasrec, path: runs/small/vg/sasrec}
+eval: {track: A, K: 20, n_test: 1000, n_valid: 300, seed: 13, pool: 200, hist_len: 10}
+prompt: {max_facts: 3, item_chars: 400, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+reference: wholepool@p0
+arms:
+- {name: retriever, method: retriever}
+- {name: pointwise, method: pointwise}
+- {name: wholepool@p0, method: luce, m: 0, perm: 0}
+- {name: wholepool@p1, method: luce, m: 0, perm: 1}
+- {name: wholepool@p2, method: luce, m: 0, perm: 2}
+- {name: prior, method: luce, m: 0, perm: 0, null_state: true}
+- {name: luce_m5_r2, method: luce, m: 5, rounds: 2}
+- {name: luce_m5_r3, method: luce, m: 5, rounds: 3}
+- {name: luce_m10_r2, method: luce, m: 10, rounds: 2}
+- {name: luce_m10_r2_a1, method: luce, m: 10, rounds: 2, adaptive: 1}
+- {name: prior_m10_r2, method: luce, m: 10, rounds: 2, null_state: true}
+- {name: luce_m10_r2_count, method: luce, m: 10, rounds: 2, evidence: kg+cf, profile: count}
+- {name: graph, method: graph}
+- {name: luce_m10_r2_prof, method: luce, m: 10, rounds: 2, profile: decision}
+- {name: luce_m10_r2_um, method: luce, m: 10, rounds: 2, profile: decision, evidence: pref, intent: true}
+- {name: wholepool_masked, method: luce, m: 0, perm: 0, mask_titles: true}
+- {name: luce_m10_r2_masked, method: luce, m: 10, rounds: 2, mask_titles: true}

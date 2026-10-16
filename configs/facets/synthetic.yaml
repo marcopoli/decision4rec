@@ -1,0 +1,15 @@
+# Facets for the synthetic data of the tests. The oracle backend answers an option tagged [nest:k] by the true
+# category of the item in the state.
+domain: synthetic
+item_chars: 200
+threshold: 0.4
+questions:
+  - name: category
+    type: choice
+    instructions: Which category is the item in the state?
+    options: {c0: "[nest:0] cat0", c1: "[nest:1] cat1", c2: "[nest:2] cat2", c3: "[nest:3] cat3",
+              c4: "[nest:4] cat4", c5: "[nest:5] cat5", c6: "[nest:6] cat6", c7: "[nest:7] cat7"}
+    match: {c0: [cat0], c1: [cat1], c2: [cat2], c3: [cat3], c4: [cat4], c5: [cat5], c6: [cat6], c7: [cat7]}
+  - name: low_category
+    type: noul
+    instructions: "The item in the state is in one of the first categories [nest:0]."

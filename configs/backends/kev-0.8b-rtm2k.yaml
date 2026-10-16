@@ -1,0 +1,6 @@
+# Kev-Rec, data curve (R22, 2026-10-15): Kev-0.8B trained like kev-0.8b-rtm on 2,000 of its records, nested with the
+# 8,000 of rtm8k (scripts/subset_records.py runs/small/rectune_choices_rtm runs/small/rectune_choices_rtm2k 2000 2026
+# --anchor 8000). Served from its run folder: uv run --extra serve python -m kev.serve --run runs/kev-0.8b-rtm2k --port 8009
+tag: kev-0.8b-rtm2k
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-0.8b-rtm2k, api_key_env: KEV_API_KEY}
