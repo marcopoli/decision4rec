@@ -804,6 +804,31 @@ stage_ml1m_plus_rt() {   # the 0.8B pool reader named by RT_MODEL (configs of RT
     --arms "$RTV,rtm" --only dm,fuse --head 100 --out "runs/$setting/ml1m_plus_${RT_MODEL}_eval_0.8b.md"
 }
 
+stage_ml1m_rt() {   # as ml1m_plus_rt, on plain MovieLens-1M (titles and genres), against rtm
+  rt_only_small || return 1
+  server_start "runs/kev-0.8b-$RT_MODEL"
+  run $J run --config "$(cfg ml1m "$RTV")" --backend "$B/kev-0.8b-$RT_MODEL.yaml"
+  server_stop
+  run $J asc --runs "runs/$setting/ml1m/ml1m_${RTV}_kev-0.8b-$RT_MODEL" "runs/$setting/ml1m/ml1m_rtm_kev-0.8b-rtm" \
+    --arms "$RTV,rtm" --only dm,fuse --head 100 --out "runs/$setting/ml1m_${RT_MODEL}_eval_0.8b.md"
+}
+
+# Contamination controls (2026-10-16, review R2): the trained pool reader of a size answers the requests of Decision4Rec-Full
+# with an empty history (history-free prior) and with item titles removed (title-masked); configs <domain>_rtmctl.yaml,
+# whose normal arm is read from the cache. CTL_DOMAINS limits the domains. Compare with logs/probe/arm_pairs.py
+# rtmctl:rtm kev-<size>-rtm rtmctl:rtm_masked kev-<size>-rtm.
+ctl_eval() {
+  local size="$1" d
+  rt_only_small || return 1
+  server_start "runs/kev-$size-rtm"
+  for d in ${CTL_DOMAINS:-vg mi steam ind ml1m ml1m_plus}; do
+    run $J run --config "$(cfg "$d" rtmctl)" --backend "$B/kev-$size-rtm.yaml" --no-report
+  done
+  server_stop
+}
+stage_ctl_08() { ctl_eval 0.8b; }
+stage_ctl_4() { ctl_eval 4b; }
+
 stage_ml1m_plus_rt_4() {   # as ml1m_plus_rt, for the 4B pool reader named by RT_MODEL (R19 at 4B on the Spark), against rtm 4B
   rt_only_small || return 1
   server_start "runs/kev-4b-$RT_MODEL"

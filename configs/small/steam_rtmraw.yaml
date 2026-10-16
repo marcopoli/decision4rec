@@ -1,0 +1,21 @@
+# Control of gap G2 (2026-10-16, review R6): as steam_rtm.yaml, but the statements are raw counts of the
+# store instead of positions on its scales (evidence.raw). Records RTV=rtmraw, model kev-0.8b-rtmraw.
+name: steam_rtmraw
+dataset: data/processed/steam
+out: runs/small/steam
+retriever: {kind: pool, tag: pool}
+pool: {ref: configs/small/steam_semantic.yaml, model: sasrecf, users: 15000, seed: 11}
+eval: {track: B, K: 30, n_test: 2000, n_valid: 1000, seed: 13, pool: 200, hist_len: 10}
+evidence: {frac: 1.0, seed: 0, days: 30, fusion: [1, 1, 0.6, 0.3], raw: true}
+prompt: {max_facts: 3, item_chars: 90, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+item_text:
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/steam/retrieval
+reference: rtmraw
+benchmark:
+  system: rtmraw
+  report: [retriever, rtmraw]
+  baselines: [sasrec, sasrecf, seqrules, contentknn, transtext]
+arms:
+- {name: retriever, method: retriever}
+- {name: rtmraw, method: luce, m: 0, rounds: 2, evidence: stats+found}     # 30 best of the pool, statements and the agents that found each item
