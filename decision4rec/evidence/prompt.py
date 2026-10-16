@@ -31,7 +31,7 @@ class EvidencePromptBuilder(PromptBuilder):
 
     def state(self, case: Case, null_state: bool = False, **kw) -> str:
         s = super().state(case, null_state=null_state, **kw)
-        return s if null_state else f"{s}\n{self.store.regime_line()}\n{LEGEND}"
+        return s if null_state else f"{s}\n{self.store.regime_line()}\n{getattr(self.store, 'legend', LEGEND)}"
 
     def option(self, case: Case, item: int, evidence: str = "none", mask_titles: bool = False,
                facts: Optional[list[str]] = None, prof=None) -> str:

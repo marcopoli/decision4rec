@@ -1,0 +1,6 @@
+# Kev-Rec, control of gap G2 (2026-10-16, review R6): Kev-0.8B trained like kev-0.8b-rtm, on records whose statements
+# are raw counts of the store instead of positions on its scales (RTV=rtmraw). Served from its run folder:
+# uv run --extra serve python -m kev.serve --run runs/kev-0.8b-rtmraw --port 8009
+tag: kev-0.8b-rtmraw
+workers: 1
+backend: {kind: systemone, base_url: "http://127.0.0.1:8009", model: kev-latest, name: kev-0.8b-rtmraw, api_key_env: KEV_API_KEY}

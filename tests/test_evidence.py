@@ -136,3 +136,21 @@ def test_fused_candidates_are_stable_and_leave_history_out(workspace, tmp_path):
         yaml.safe_dump(cfg, f)
     info = export_evidence_choices([path], str(tmp_path / "evf"), n_per_dataset=20, n_heldout=2, dropout=0.0)
     assert info["train"] == 20 and info["version"] == 2
+
+
+def test_raw_count_statements_write_numbers_not_levels(workspace):
+    """Control of gap G2: the same statements as raw counts; the default stays on levels of the store."""
+    from decision4rec.data.schema import Dataset
+    from decision4rec.evidence.store import LEGEND, LEGEND_RAW, EvidenceStore
+    from decision4rec.experiments.runner import load_config
+
+    ds = Dataset.load(load_config(workspace("ev_raw"))["dataset"])
+    text = np.random.default_rng(0).normal(size=(ds.n_items, 8))
+    lev, raw = EvidenceStore(ds, 1.0, text=text), EvidenceStore(ds, 1.0, text=text, raw=True)
+    h = [int(x[0]) for x in ds.seqs[0][:-1]]
+    now = lev.now(0, len(h))
+    item = lev.candidates(h, now, 30)[0]
+    t_lev, t_raw = lev.tags(lev.context(h, now), item), raw.tags(raw.context(h, now), item)
+    assert f"sold {int(raw.pop[item])}" in t_raw and "top" not in t_raw.split("; text")[0]
+    assert not re.search(r"sold \d", t_lev)
+    assert lev.legend == LEGEND and raw.legend == LEGEND_RAW

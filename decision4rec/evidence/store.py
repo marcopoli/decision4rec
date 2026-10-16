@@ -24,6 +24,10 @@ FAMILIES = ("sold", "lately", "after", "with", "text")
 LEGEND = ("Candidate evidence, relative to this store: sold = all purchases; lately = last 30 days; after last = "
           "taken right after your last item; with yours = your items it is bought with; text = closeness to your "
           "last item.")
+# Control of gap G2 (raw counts instead of positions on scales of the store): the same statements as numbers.
+LEGEND_RAW = ("Candidate evidence, counts in this store: sold = all purchases; lately = purchases in the last 30 days; "
+              "after last = weighted count of times taken right after your last item; with yours = your items it is "
+              "bought with; text = closeness to your last item.")
 QUOTAS = (("after", 10), ("with", 8), ("text", 8), ("lately", 4))      # shares of a candidate list of 30
 
 
@@ -52,8 +56,10 @@ class Context:
 class EvidenceStore:
     def __init__(self, ds: Dataset, frac: float = 1.0, holdout: int = 2, seed: int = 0,
                  text: Optional[np.ndarray] = None, days: float = 30.0, recent: int = 3, decay: float = 0.5,
-                 fusion: Optional[tuple] = None):
+                 fusion: Optional[tuple] = None, raw: bool = False):
         self.ds, self.frac, self.holdout, self.recent, self.decay = ds, float(frac), holdout, recent, decay
+        self.raw = raw                                # statements as raw counts, not levels of the store (G2 control)
+        self.legend = LEGEND_RAW if raw else LEGEND
         self.fusion = tuple(float(w) for w in fusion) if fusion else None    # weights: after, with, text, lately
         n_items = ds.n_items
         if frac >= 1.0:
@@ -139,20 +145,20 @@ class EvidenceStore:
         parts = []
         if self.has_data:
             if "sold" not in drop:
-                parts.append("sold " + ("none yet" if self.pop[item] == 0 else
+                parts.append("sold " + (str(int(self.pop[item])) if self.raw else "none yet" if self.pop[item] == 0 else
                                         _bucket(self.pop[item], self.q_sold, ("top 1%", "top 10%", "top half", "rare"))))
             if "lately" not in drop and ctx.now is not None:
                 n = self.recent_count(item, ctx.now)
-                parts.append("lately " + ("none" if n == 0 else
+                parts.append("lately " + (str(int(n)) if self.raw else "none" if n == 0 else
                                           _bucket(n, self.q_lately, ("very high", "high", "some", "low"))))
             if "after" not in drop:
                 w = ctx.after.get(item, 0.0)
                 where = "after last" if ctx.after_last.get(item, 0.0) > 0 else "after recent"
-                parts.append(f"{where} " + ("never" if w == 0 else
+                parts.append(f"{where} " + (f"{w:.1f}" if self.raw else "never" if w == 0 else
                                            _bucket(w, self.q_after, ("very often", "often", "sometimes", "rarely"))))
             if "with" not in drop:
                 n = ctx.with_n.get(item, 0)
-                parts.append(f"with yours {min(n, 5)}" + ("+" if n > 5 else ""))
+                parts.append(f"with yours {n}" if self.raw else f"with yours {min(n, 5)}" + ("+" if n > 5 else ""))
         if "text" not in drop and ctx.text_rank is not None:
             r = int(ctx.text_rank[item])
             parts.append("text " + ("top 10" if r <= 10 else "top 50" if r <= 50 else "top 500" if r <= 500 else "far"))
@@ -277,8 +283,9 @@ def store_for(cfg: dict, ds: Dataset, holdout: int = 2, frac: Optional[float] = 
     frac = float(ecfg.get("frac", 1.0) if frac is None else frac)
     seed, days = int(ecfg.get("seed", 0)), float(ecfg.get("days", 30.0))
     fusion = tuple(float(w) for w in ecfg["fusion"]) if ecfg.get("fusion") else None
-    key = (cfg["dataset"], frac, holdout, seed, days, fusion)
+    raw = bool(ecfg.get("raw", False))
+    key = (cfg["dataset"], frac, holdout, seed, days, fusion, raw)
     if key not in _STORES:
         prepare_dataset({**cfg, "item_text": cfg.get("item_text") or ecfg}, ds, ["contentknn"])
-        _STORES[key] = EvidenceStore(ds, frac, holdout, seed, ds.extra.get("item_text_matrix"), days, fusion=fusion)
+        _STORES[key] = EvidenceStore(ds, frac, holdout, seed, ds.extra.get("item_text_matrix"), days, fusion=fusion, raw=raw)
     return _STORES[key]

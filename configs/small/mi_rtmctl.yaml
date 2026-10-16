@@ -1,0 +1,23 @@
+# Contamination controls (2026-10-16, review R2): the pool reader with an empty history (history-free prior)
+# and with item titles removed (title-masked), next to the normal request (cached). Stage ctl_08 / ctl_4.
+name: mi_rtmctl
+dataset: data/processed/musical_instruments
+out: runs/small/mi
+retriever: {kind: pool, tag: pool}
+pool: {ref: configs/small/mi_semantic.yaml, model: sasrecf, users: 15000, seed: 11}
+eval: {track: B, K: 30, n_test: 2000, n_valid: 1000, seed: 13, pool: 200, hist_len: 10}
+evidence: {frac: 1.0, seed: 0, days: 30, fusion: [1, 1, 0.6, 0.3]}
+prompt: {max_facts: 3, item_chars: 90, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+item_text:
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/mi/retrieval
+reference: rtm
+benchmark:
+  system: rtm
+  report: [retriever, rtm]
+  baselines: [gru4rec, sasrec, sasrecf, seqrules, contentknn, transtext]
+arms:
+- {name: retriever, method: retriever}
+- {name: rtm, method: luce, m: 0, rounds: 2, evidence: stats+found}
+- {name: rtm_prior, method: luce, m: 0, rounds: 2, evidence: stats+found, null_state: true}     # no history: what item knowledge alone gives
+- {name: rtm_masked, method: luce, m: 0, rounds: 2, evidence: stats+found, mask_titles: true}   # no titles, in the history or the options
