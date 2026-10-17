@@ -1,0 +1,25 @@
+# rtm with the candidates of SASRecF instead of the agents' lists (claim test 2026-10-16): per user, SASRecF's best items,
+# as many as the pool has; same features, same residual ranker, same users. Tests whether the pool gains from the
+# agents' candidates or from their signals.
+# Decision4Rec rtm (paper Section 4.6): the full architecture. A multi-agent pool (SASRecF as one agent, the agents of the
+# knowledge graph of the scenario, popularity) ranked by a residual fast ranker; the decision model reads the 30 best
+# with item text, statements and the agents that found them, and is fused with the ranker on validation users.
+name: steam_rtms
+dataset: data/processed/steam
+out: runs/small/steam
+retriever: {kind: pool, tag: pools}
+pool: {ref: configs/small/steam_semantic.yaml, model: sasrecf, users: 15000, seed: 11, cands: sasrecf}
+eval: {track: B, K: 30, n_test: 2000, n_valid: 1000, seed: 13, pool: 200, hist_len: 10}
+evidence: {frac: 1.0, seed: 0, days: 30, fusion: [1, 1, 0.6, 0.3]}
+prompt: {max_facts: 3, item_chars: 90, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+item_text:
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/steam/retrieval
+reference: rtm
+benchmark:
+  system: rtm
+  report: [retriever, rtm]
+  baselines: [sasrec, sasrecf, seqrules, contentknn, transtext]
+arms:
+- {name: retriever, method: retriever}
+- {name: rtm, method: luce, m: 0, rounds: 2, evidence: stats+found}     # 30 best of the pool, statements and the agents that found each item

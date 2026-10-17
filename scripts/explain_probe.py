@@ -5,7 +5,8 @@
 For every test case the decision model answers the request of the full architecture, then the same request with one
 family of statements left out (sold, lately, after, with, text) or without the "found by" lines. For each family:
 mean change of the probability of the item ranked first, share of cases whose first choice changes, and NDCG@10 of
-the decision without the family (an ablation at inference time). The family whose removal changes the first item's
+the decision without the family (an ablation at inference time), and the within-list Spearman correlation of the
+answer with the order of the first stage (for the pool: its residual ranker), which shows what makes the two agree. The family whose removal changes the first item's
 probability most is the explanation of that recommendation; a deletion test checks that it matters more than a family
 drawn at random.
 """
@@ -15,9 +16,11 @@ import os
 import sys
 
 import numpy as np
+from scipy.stats import spearmanr
 
 from decision4rec.data.schema import Dataset
 from decision4rec.decision.base import build_backend
+from decision4rec.eval import metrics as M
 from decision4rec.evidence.store import FAMILIES
 from decision4rec.experiments.runner import get_cases, load_config, make_prompt_builder
 
@@ -55,13 +58,18 @@ def main(cfg_path: str, backend_path: str, n: int) -> None:
     for v in VARIANTS:
         A = np.array(P[v])
         nd = np.mean([ndcg(A[i], Y[i]) for i in range(len(Y))])
+        rhos = np.array([spearmanr(A[i], cases[i].rscores).statistic for i in range(len(Y))])
+        rho = round(float(np.nanmean(rhos)), 3)
         if v == "full":
-            rows[v] = {"ndcg10": round(float(nd), 4)}
+            rho_full = rhos
+            rows[v] = {"ndcg10": round(float(nd), 4), "spearman_first_stage": rho}
             continue
+        ok = ~np.isnan(rhos) & ~np.isnan(rho_full)                  # constant answers have no rank correlation
         dp = full[np.arange(len(top)), top] - A[np.arange(len(top)), top]
         delta[v] = np.abs(dp)
         rows[v] = {"mean_abs_dp_top": round(float(np.abs(dp).mean()), 4), "top_changes": round(float((A.argmax(1) != top).mean()), 3),
-                   "ndcg10_without": round(float(nd), 4), "ndcg10_change": round(float(nd - rows["full"]["ndcg10"]), 4)}
+                   "ndcg10_without": round(float(nd), 4), "ndcg10_change": round(float(nd - rows["full"]["ndcg10"]), 4),
+                   "spearman_first_stage": rho, "spearman_p_vs_full": round(float(M.paired_randomization(rhos[ok], rho_full[ok])), 4)}
     D = np.stack([delta[v] for v in VARIANTS[1:]], 1)
     expl = D.argmax(1)
     rng = np.random.default_rng(0)

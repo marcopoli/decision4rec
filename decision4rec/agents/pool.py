@@ -42,7 +42,7 @@ def persp_names() -> list[str]:
 def kg_agent(kg, history: list[int], k: int) -> list[int]:
     score, seen = Counter(), set(history)
     for s in history[-3:]:
-        for key in kg.attrs[s]:
+        for key in sorted(kg.attrs[s]):          # fixed order: sums and ties must not depend on the hash seed
             w = kg.idf.get(key)
             if w and len(kg.ent_items[key]) <= 200:
                 for j in kg.ent_items[key]:
@@ -60,6 +60,7 @@ class AgentPool:
         self.hidden = 0                              # 0: linear residual; > 0: one hidden layer
         self.persp_slots = 0                         # slots of the top k reserved for perspective candidates
         self.persp_profile = False                   # version 5a features
+        self.sasrecf_cands = False                   # ablation: candidates = SASRecF's best items, as many as the pool
         self.depth, self.seq_depth = depth, seq_depth
         self.popular = [int(j) for j in np.argsort(-store.pop, kind="stable")[:300]]
         self.net = None
@@ -95,6 +96,8 @@ class AgentPool:
     def features(self, history: list[int], now, row: Optional[np.ndarray]):
         L = self.lists(history, now, row)
         pool = list(dict.fromkeys(j for a in self.agents for j in L[a]))
+        if self.sasrecf_cands and row is not None:   # same size, same features: tests candidates against signals
+            pool = [int(j) for j in np.argsort(-row, kind="stable")[: len(pool)]]
         pos = {a: {j: r for r, j in enumerate(L[a])} for a in self.agents}
         ctx = self.store.context(history, now)
         prof = self.persp.rates(history) if (self.persp is not None and self.persp_profile) else None
@@ -256,6 +259,7 @@ def refit(pool: AgentPool, users: list[int], pc: dict) -> AgentPool:
     Used to cross-fit training records: a user's candidates come from a ranker that never saw that user."""
     p2 = AgentPool(pool.ds, pool.store, pool.scorer, pool.kg, pool.depth, pool.seq_depth, pool.persp)
     p2.hidden, p2.persp_slots, p2.persp_profile = pool.hidden, pool.persp_slots, pool.persp_profile
+    p2.sasrecf_cands = pool.sasrecf_cands
     p2.fit(users, lams=tuple(float(x) for x in pc.get("lams", (0.1, 0.3, 1.0, 3.0))), steps=int(pc.get("steps", 400)))
     return p2
 
@@ -330,6 +334,9 @@ def pool_for(cfg: dict, ds: Dataset) -> AgentPool:
         tag += "_prof"
     if pool.hidden:
         tag += f"_h{pool.hidden}"
+    pool.sasrecf_cands = pc.get("cands") == "sasrecf"
+    if pool.sasrecf_cands:
+        tag += "_cs"
     path = os.path.join(cfg["out"], "pool", f"{tag}.pt")
     if os.path.exists(path):
         pool.load(path)
