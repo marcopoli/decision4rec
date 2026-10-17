@@ -4,26 +4,26 @@
 
 The same models after fusion with the order that they receive, which is the final score of Decision4Rec. Bold: best model of the block. The released models and the trained 0.8B model are within 0.0017 of each other on the four main domains (0.0036 on MovieLens-1M); read alone (paper, Section 8) they are 0.0094 to 0.0626 apart. † as in the paper.
 
-| NDCG@10 ↑ | Video Games | Musical Instr. | Steam | Industrial† | MovieLens-1M† |
-|---|---|---|---|---|---|
-| **Decision4Rec-Full** |  |  |  |  |  |
-| Jev, released | 0.0733 | 0.0479 | 0.0789 | 0.0391 | 0.1890 |
-| Kev-0.8B, released | 0.0728 | 0.0475 | 0.0785 | 0.0404 | 0.1899 |
-| Kev-4B, released | 0.0733 | 0.0474 | 0.0799 | 0.0389 | 0.1869 |
-| Kev-0.8B, trained | 0.0741 | 0.0467 | **0.0802** | 0.0401 | 0.1863 |
-| Kev-4B, trained | **0.0780** | **0.0504** | 0.0801 | **0.0407** | **0.1907** |
-| **Decision4Rec-KG with logs** |  |  |  |  |  |
-| Jev, released | 0.0606 | 0.0380 | 0.0553 | 0.0336 | 0.1530 |
-| Kev-0.8B, released | 0.0600 | 0.0361 | **0.0565** | 0.0297 | 0.1514 |
-| Kev-4B, released | 0.0612 | 0.0363 | 0.0553 | 0.0317 | 0.1476 |
-| Kev-0.8B, trained | **0.0637** | 0.0401 | 0.0558 | 0.0348 | **0.1532** |
-| Kev-4B, trained | 0.0630 | **0.0427** | **0.0668** | **0.0353** | not yet run |
-| **Decision4Rec-KG, catalogue only** |  |  |  |  |  |
-| Jev, released | – | – | – | 0.0185 | 0.0382 |
-| Kev-0.8B, released | – | – | – | 0.0171 | 0.0314 |
-| Kev-4B, released | – | – | – | 0.0171 | 0.0341 |
-| Kev-0.8B, trained | – | – | – | 0.0211 | **0.0383** |
-| Kev-4B, trained | – | – | – | **0.0219** | not yet run |
+| NDCG@10 ↑ | Video Games | Musical Instr. | Steam | Industrial† | ML-1M plain† | ML-1M enriched† |
+|---|---|---|---|---|---|---|
+| **Decision4Rec-Full** |  |  |  |  |  |  |
+| Jev, released | 0.0733 | 0.0479 | 0.0789 | 0.0391 | 0.1890 | 0.1955 |
+| Kev-0.8B, released | 0.0728 | 0.0475 | 0.0785 | 0.0404 | 0.1899 | 0.1950 |
+| Kev-4B, released | 0.0733 | 0.0474 | 0.0799 | 0.0389 | 0.1869 | 0.1950 |
+| Kev-0.8B, trained | 0.0741 | 0.0467 | **0.0802** | 0.0401 | 0.1863 | 0.1939 |
+| Kev-4B, trained | **0.0780** | **0.0504** | 0.0801 | **0.0407** | **0.1907** | **0.1968** |
+| **Decision4Rec-KG with logs** |  |  |  |  |  |  |
+| Jev, released | 0.0606 | 0.0380 | 0.0553 | 0.0336 | 0.1530 | 0.1492 |
+| Kev-0.8B, released | 0.0600 | 0.0361 | **0.0565** | 0.0297 | 0.1514 | 0.1457 |
+| Kev-4B, released | 0.0612 | 0.0363 | 0.0553 | 0.0317 | 0.1476 | 0.1483 |
+| Kev-0.8B, trained | **0.0637** | 0.0401 | 0.0558 | 0.0348 | **0.1532** | **0.1512** |
+| Kev-4B, trained | 0.0630 | **0.0427** | **0.0668** | **0.0353** | not yet run | not yet run |
+| **Decision4Rec-KG, catalogue only** |  |  |  |  |  |  |
+| Jev, released | – | – | – | 0.0185 | 0.0382 | 0.0347 |
+| Kev-0.8B, released | – | – | – | 0.0171 | 0.0314 | 0.0289 |
+| Kev-4B, released | – | – | – | 0.0171 | 0.0341 | 0.0300 |
+| Kev-0.8B, trained | – | – | – | 0.0211 | **0.0383** | **0.0357** |
+| Kev-4B, trained | – | – | – | **0.0219** | not yet run | not yet run |
 
 ## The paid API against open weights
 
@@ -38,8 +38,8 @@ Hosted Jev and open Kev as the decision model of Decision4Rec.
 | Time per user | 310–340 ms | 157–167 ms (0.8B, RTX 3090) |
 | User data | sent to the provider | stays in the scenario |
 | Replay | from saved answers only | from the weights and saved answers |
-| Quality as released | not significantly different from Kev-4B in 8 of 12 settings; better with a catalogue only and on MovieLens-1M | not significantly different from Jev in 8 of 12 settings |
-| Quality after training | training not possible | read alone, above Jev in 9 of 12 settings (0.8B, up to +43%) and in all 10 where both ran (4B, +15 to +50%) |
+| Quality as released | not significantly different from Kev-4B in 10 of 15 settings; better with a catalogue only and on the plain MovieLens-1M | not significantly different from Jev in 10 of 15 settings |
+| Quality after training | training not possible | read alone, above Jev in 11 of 15 settings (0.8B, up to +43%) and in all 11 where both ran (4B, +15 to +50%) |
 | Repeatable answers | no (0.3–0.7% identical) | yes, up to rounding |
 
 ## Repeatability of the hosted answers
