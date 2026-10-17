@@ -16,12 +16,14 @@ The same models after fusion with the order that they receive, which is the fina
 | Jev, released | 0.0606 | 0.0380 | 0.0553 | 0.0336 | 0.1530 |
 | Kev-0.8B, released | 0.0600 | 0.0361 | **0.0565** | 0.0297 | 0.1514 |
 | Kev-4B, released | 0.0612 | 0.0363 | 0.0553 | 0.0317 | 0.1476 |
-| Kev-0.8B, trained | **0.0637** | **0.0401** | 0.0558 | **0.0348** | **0.1532** |
+| Kev-0.8B, trained | **0.0637** | 0.0401 | 0.0558 | 0.0348 | **0.1532** |
+| Kev-4B, trained | 0.0630 | **0.0427** | **0.0668** | **0.0353** | not yet run |
 | **Decision4Rec-KG, catalogue only** |  |  |  |  |  |
 | Jev, released | – | – | – | 0.0185 | 0.0382 |
 | Kev-0.8B, released | – | – | – | 0.0171 | 0.0314 |
 | Kev-4B, released | – | – | – | 0.0171 | 0.0341 |
-| Kev-0.8B, trained | – | – | – | **0.0211** | **0.0383** |
+| Kev-0.8B, trained | – | – | – | 0.0211 | **0.0383** |
+| Kev-4B, trained | – | – | – | **0.0219** | not yet run |
 
 ## The paid API against open weights
 
@@ -37,7 +39,7 @@ Hosted Jev and open Kev as the decision model of Decision4Rec.
 | User data | sent to the provider | stays in the scenario |
 | Replay | from saved answers only | from the weights and saved answers |
 | Quality as released | not significantly different from Kev-4B in 8 of 12 settings; better with a catalogue only and on MovieLens-1M | not significantly different from Jev in 8 of 12 settings |
-| Quality after training | training not possible | read alone, above Jev in 9 of 12 settings (0.8B, up to +43%) and in 4 of 4 (4B, +15 to +50%) |
+| Quality after training | training not possible | read alone, above Jev in 9 of 12 settings (0.8B, up to +43%) and in all 10 where both ran (4B, +15 to +50%) |
 | Repeatable answers | no (0.3–0.7% identical) | yes, up to rounding |
 
 ## Repeatability of the hosted answers
