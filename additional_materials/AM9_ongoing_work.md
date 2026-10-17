@@ -10,7 +10,7 @@
 | Raw counts instead of scales | gap G2: whether positions on scales are what lets one model serve a new scenario | queued |
 | History-free prior and title-masked requests | how much of a result memorized item names or popular items explain | queued |
 | Decision4Rec-Full with a decision model trained on all four domains | what training on the held-out domain adds, for the full system | queued |
-| Decision4Rec-KG at 4B | whether a larger reader adds a clear gain to the candidates of the knowledge graph | running |
+| Decision4Rec-KG at 4B | whether a larger reader adds a clear gain to the candidates of the knowledge graph | done for Video Games, Musical Instruments, Steam and Industrial and Scientific (in the paper: +3 to +23% after fusion, significant in three domains); MovieLens-1M queued |
 | 250 characters per item at 4B; a stronger text encoder in the pool; a profile statement | whether more content helps a larger model and long histories | queued |
 | Fifty options instead of thirty | whether the decision model can use the items that the ranker places between 31 and 50 | queued |
 | Decision4Rec-Full inside the runtime | that the deployment form is the system that was evaluated | planned |
