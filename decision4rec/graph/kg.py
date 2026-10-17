@@ -42,7 +42,7 @@ class ItemKG:
         if "kg" in kinds:
             share: Counter = Counter()
             for h in history:
-                for key in self.attrs[item] & self.attrs[h]:
+                for key in sorted(self.attrs[item] & self.attrs[h]):
                     if key in self.idf:
                         share[key] += 1
             for (rel, ent), cnt in share.items():
@@ -76,7 +76,7 @@ class ItemKG:
             for j, c in self.cooc.get(s, {}).items():
                 if j not in exclude:
                     score[j] += 1.0 + math.log1p(c)
-            for key in self.attrs[s]:
+            for key in sorted(self.attrs[s]):    # fixed order: sums and ties must not depend on the hash seed
                 w = self.idf.get(key)
                 if w and len(self.ent_items[key]) <= 200:
                     for j in self.ent_items[key]:

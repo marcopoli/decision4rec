@@ -1,7 +1,8 @@
 """A stronger ranker of the pool (review 2026-10-16, R26): the residual ranker with one hidden layer (configs
 <d>_rtmh.yaml, pool tag poolh) against the linear residual ranker of Decision4Rec-Full (pool) and against Decision4Rec-Full
 with its 4B decision model fused, on the same development test users (paired randomization tests).
-python logs/probe/ranker_control.py [vg mi steam ind]"""
+python logs/probe/ranker_control.py [vg mi steam ind]
+ALT=rtms compares instead the pool whose candidates are SASRecF's best items, as many as the pool (configs <d>_rtms.yaml)."""
 import json
 import os
 import sys
@@ -39,16 +40,17 @@ def fused(d, tag="kev-4b-rtm"):   # Decision4Rec-Full fused with the validation 
     return dict(zip(sorted(cases["test"]), _ndcg(fuse(g, "test"), cases["test"]))), g   # _ndcg follows sorted case ids
 
 
+ALT = os.environ.get("ALT", "rtmh")
 for d in sys.argv[1:] or ["vg", "mi", "steam", "ind"]:
     lin = load_cases(case_paths(load_config(f"configs/small/{d}_rtm.yaml"))["test"])
-    hid = load_cases(case_paths(load_config(f"configs/small/{d}_rtmh.yaml"))["test"])
+    hid = load_cases(case_paths(load_config(f"configs/small/{d}_{ALT}.yaml"))["test"])
     assert [c.user for c in lin] == [c.user for c in hid], "different users"
     a, b = list_ndcg(lin), list_ndcg(hid)
     f, g = fused(d)
     assert all(c.cid in f for c in lin), "test users without answers of the decision model"
     full = np.array([f[c.cid] for c in lin])
     hit = lambda cs: np.mean([c.target_pos >= 0 for c in cs])
-    print(f"{d} (test {len(lin)}): linear ranker {a.mean():.4f} | hidden-layer ranker {b.mean():.4f} "
+    print(f"{d} (test {len(lin)}): linear ranker {a.mean():.4f} | {ALT} {b.mean():.4f} "
           f"({100 * (b.mean() / a.mean() - 1):+.1f}%, p={M.paired_randomization(b, a):.3f}) | target in 30: {hit(lin):.3f} / {hit(hid):.3f} | "
-          f"Full 4B fused (g={g}) {full.mean():.4f}: vs hidden-layer ranker {100 * (full.mean() / b.mean() - 1):+.1f}% "
+          f"Full 4B fused (g={g}) {full.mean():.4f}: vs {ALT} {100 * (full.mean() / b.mean() - 1):+.1f}% "
           f"(p={M.paired_randomization(full, b):.3f})", flush=True)

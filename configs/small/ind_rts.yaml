@@ -1,0 +1,20 @@
+# Decision4Rec rt on SASRecF's own top 30 in Industrial and Scientific (R4, 2026-10-16): the decision model reads the item
+# text only, no statements, on the same cases as ind_rte (retriever tag sasrecf), so rt and rte are paired here as in
+# the other domains. ind_rt reorders content KNN instead (the zero-data design of docs/07). Development users (seed 13).
+name: ind_rts
+dataset: data/processed/industrial_scientific
+out: runs/small/ind
+retriever: {kind: baseline, model: sasrecf, ref: configs/small/ind_semantic.yaml, tag: sasrecf}
+eval: {track: B, K: 30, n_test: 2000, n_valid: 1000, seed: 13, pool: 200, hist_len: 10}
+prompt: {max_facts: 3, item_chars: 90, profile_hist: 30, max_hypotheses: 24, max_intents: 10}
+item_text:
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/ind/retrieval
+reference: rt
+benchmark:
+  system: rt
+  report: [retriever, rt]
+  baselines: [pop, seqrules, contentknn, transtext, sasrec, sasrecf]
+arms:
+- {name: retriever, method: retriever}
+- {name: rt, method: luce, m: 0, rounds: 2}     # whole pool, two random orders in one request
