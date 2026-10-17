@@ -3,8 +3,8 @@
 | Item | What it tests | Status |
 |---|---|---|
 | Confirmation on 10,000 fresh users per domain, with an analysis plan written before scoring, a split on global time, and SASRecF trained also on the targets that train the ranker and the decision model | that the development results are not the effect of our design choices, of the leave-one-out split or of extra training targets | users reserved; needs more computing power |
-| Kev-27B trained on a fixed set of 8,000 records, with Kev-0.8B and Kev-4B trained again on the same records | whether the gain from 0.8B to 4B continues at 27B on the same data | 27B trained; evaluation running; smaller models queued |
-| Kev-27B as released | how much of a strong released model remains once the state carries the statements | queued |
+| Kev-27B trained on a fixed set of 8,000 records, with Kev-0.8B and Kev-4B trained again on the same records | whether the gain from 0.8B to 4B continues at 27B on the same data | 27B done (in the paper: +4 to +8% over the pool in all four domains, significant on Video Games and Steam); 0.8B and 4B on the same records queued |
+| Kev-27B as released | how much of a strong released model remains once the state carries the statements | running |
 | Kev-9B on the same 8,000 records | the shape of the size curve | queued |
 | The 0.8B model on 2,000, 4,000, 8,000 and 16,000 records | whether more records help at a fixed size | queued |
 | Raw counts instead of scales | gap G2: whether positions on scales are what lets one model serve a new scenario | queued |
