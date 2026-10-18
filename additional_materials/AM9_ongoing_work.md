@@ -12,5 +12,5 @@
 | Decision4Rec-Full with a decision model trained on all four domains | what training on the held-out domain adds, for the full system | queued |
 | Decision4Rec-KG at 4B | whether a larger reader adds a clear gain to the candidates of the knowledge graph | done in all six settings (in the paper) |
 | 250 characters per item at 4B; a stronger text encoder in the pool; a profile statement | whether more content helps a larger model and long histories | queued |
-| Fifty options instead of thirty | whether the decision model can use the items that the ranker places between 31 and 50 | queued |
+| Fifty options instead of thirty | whether the decision model can use the items that the ranker places between 31 and 50 | done without retraining (in the paper: fused -2 to +4% at 0.8B, -1 to +4% at 4B; one p < 0.05 of eight, not Holm); training on 50 options not done |
 | Decision4Rec-Full inside the runtime | that the deployment form is the system that was evaluated | planned |
