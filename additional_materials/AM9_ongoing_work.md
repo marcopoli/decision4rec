@@ -7,7 +7,7 @@
 | Kev-27B as released | how much of a strong released model remains once the state carries the statements | done (in the paper: on 1,000 users per domain it beats the released Kev-4B and Jev in five of six domains, but a trained Kev-0.8B beats it in four of six) |
 | Kev-9B on the same 8,000 records | the shape of the size curve | queued |
 | The 0.8B model on 2,000, 4,000, 8,000 and 16,000 records | whether more records help at a fixed size | queued |
-| Raw counts instead of scales | gap G2: whether positions on scales are what lets one model serve a new scenario | queued |
+| Raw counts instead of scales | gap G2: whether positions on scales are what lets one model serve a new scenario | done (in the paper: raw counts are never worse in six settings, so the scales are a choice of form, not the cause of transfer) |
 | History-free prior and title-masked requests | how much of a result memorized item names or popular items explain | queued |
 | Decision4Rec-Full with a decision model trained on all four domains | what training on the held-out domain adds, for the full system | queued |
 | Decision4Rec-KG at 4B | whether a larger reader adds a clear gain to the candidates of the knowledge graph | done in all six settings (in the paper) |
