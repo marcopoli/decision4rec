@@ -17,7 +17,7 @@
 Decision models, such as the commercial Jev or the open Kev models, are language models that return **one probability for each option of a typed question**, in one forward pass and without generating text. Decision4Rec makes them usable for recommendation, with the decision model as an exchangeable part:
 
 - a **knowledge graph** of the scenario, kept live on the [ActiveGraph](https://github.com/yoheinakajima/activegraph) runtime, writes the logs as short statements ("sold 1,240 times", "often bought after your last item");
-- a **multi-agent pool**, with the trained recommender of the scenario (SASRecF) as one agent, proposes candidates, and a residual ranker keeps the best 30;
+- a **multi-agent pool**, with the trained recommender of the scenario as one of the agents, proposes candidates, and a residual ranker keeps the best 30;
 - a **decision model** reads them through one typed-question interface (the System One protocol), and a Luce model turns its answers into a ranking;
 - a **fusion** step combines its answers with the score of the ranker.
 
