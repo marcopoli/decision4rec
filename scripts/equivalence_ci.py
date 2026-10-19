@@ -51,20 +51,21 @@ def ci(a, b, label):
           f"95% interval {100 * lo:+.1f} to {100 * hi:+.1f}%, p={M.paired_randomization(a, b):.3f}, users {len(a)})", flush=True)
 
 
-# self-check: the stored ranks of SASRecF give the NDCG@10 of the order of its own 30 best items (Table 12, 0.0622 on VG)
-b, cs = base("vg", "rte", "sasrecf")
-lst = np.array([listed(c) for c in cs])
-assert abs(np.mean(list(b.values())) - lst.mean()) < 5e-4, (np.mean(list(b.values())), lst.mean())
-
-for d, ref in ():  # done 2026-10-17 (logs/probe/equivalence_ci.log, first run); kept for the record: (("steam", "sasrec"), ("ml1m", "gru4rec"), ("ml1m_plus", "gru4rec"))   # "equal" / "ties" (Full)
-    b, cs = base(d, "rtm", ref)
-    for tag in ("kev-0.8b-rtm", "kev-4b-rtm"):
-        f = fused(d, tag, "rtm", "rtm")
+if __name__ == "__main__":
+    # self-check: the stored ranks of SASRecF give the NDCG@10 of the order of its own 30 best items (Table 12, 0.0622 on VG)
+    b, cs = base("vg", "rte", "sasrecf")
+    lst = np.array([listed(c) for c in cs])
+    assert abs(np.mean(list(b.values())) - lst.mean()) < 5e-4, (np.mean(list(b.values())), lst.mean())
+    
+    for d, ref in ():  # done 2026-10-17 (logs/probe/equivalence_ci.log, first run); kept for the record: (("steam", "sasrec"), ("ml1m", "gru4rec"), ("ml1m_plus", "gru4rec"))   # "equal" / "ties" (Full)
+        b, cs = base(d, "rtm", ref)
+        for tag in ("kev-0.8b-rtm", "kev-4b-rtm"):
+            f = fused(d, tag, "rtm", "rtm")
+            k = [c.cid for c in cs if c.cid in f]
+            ci([f[i] for i in k], [b[i] for i in k], f"{d} Full {tag} fused vs {ref}")
+    for d in ("vg", "mi", "ind"):                                                       # "as good as" / "reaches" (KG)
+        b, cs = base(d, "ev2", "sasrecf")                                               # ev2: the version in the paper
+        f = fused(d, "kev-0.8b-ev2", "ev2", "ev")
         k = [c.cid for c in cs if c.cid in f]
-        ci([f[i] for i in k], [b[i] for i in k], f"{d} Full {tag} fused vs {ref}")
-for d in ("vg", "mi", "ind"):                                                       # "as good as" / "reaches" (KG)
-    b, cs = base(d, "ev2", "sasrecf")                                               # ev2: the version in the paper
-    f = fused(d, "kev-0.8b-ev2", "ev2", "ev")
-    k = [c.cid for c in cs if c.cid in f]
-    ci([f[i] for i in k], [b[i] for i in k], f"{d} Decision4Rec-KG 0.8B fused vs sasrecf")
-    ci([listed(c) for c in cs], [b[c.cid] for c in cs], f"{d} KG candidates in their order vs sasrecf")
+        ci([f[i] for i in k], [b[i] for i in k], f"{d} Decision4Rec-KG 0.8B fused vs sasrecf")
+        ci([listed(c) for c in cs], [b[c.cid] for c in cs], f"{d} KG candidates in their order vs sasrecf")
