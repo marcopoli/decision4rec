@@ -10,6 +10,7 @@ How far the trained decision model repeats the order of the list it reads, 2,000
 |  | 0.8B, found-by dropout | 0.74 | 0.78 | 0.79 | 0.76 | n/a |
 |  | 0.8B, corrects the ranker | -0.18 | -0.24 | -0.31 | -0.08 | n/a |
 |  | 0.8B, 250 characters per item | 0.74 | 0.77 | 0.79 | 0.76 | 0.83‡ |
+|  | 4B, 250 characters per item | 0.68 | 0.67 | 0.77 | 0.66 | 0.77‡ |
 | 30 best of SASRecF | 0.8B | 0.36 | 0.36 | 0.32 | 0.33 | n/a |
 |  | 4B | 0.37 | 0.35 | 0.37 | 0.34 | n/a |
 | **Fused NDCG@10, change against the order of the list** ↑ |  |  |  |  |  |  |
@@ -18,6 +19,7 @@ How far the trained decision model repeats the order of the list it reads, 2,000
 |  | 0.8B, found-by dropout | +3% | +1% | +3%* | +3%* | n/a |
 |  | 0.8B, corrects the ranker | +1% | +2% | +2% | +1% | n/a |
 |  | 0.8B, 250 characters per item | +1% | +2% | +5%* | +3% | +1%‡ |
+|  | 4B, 250 characters per item | +7%* | +7% | +5%* | +7%* | +1%‡ |
 | 30 best of SASRecF | 0.8B | +16%* | +22%* | +8%* | +19%* | n/a |
 |  | 4B | +17%* | +33%* | +7% | +16%* | n/a |
 | **Surprise of the next item, users with the target among the 30 of the pool** ↓ |  |  |  |  |  |  |
@@ -26,3 +28,5 @@ How far the trained decision model repeats the order of the list it reads, 2,000
 |  | ranker alone | 3.15 | 3.17 | 3.24 | 3.13 | 3.07 |
 
 **250 characters per item (0.8B).** Read alone, the decision model changes by -2% on Video Games, +7% on Musical Instruments (p = 0.009), +2% on Steam, +4% on Industrial and Scientific (p = 0.052) and +1% on MovieLens-1M; after fusion it gains 3% on Steam (p = 0.031) and changes by -1 to +2% elsewhere. At 0.8B, more text does not stop the decision model from repeating the ranker.
+
+**250 characters per item (4B).** Against the 4B model with 90 characters, read alone: -2% on Video Games, -1% on Musical Instruments, +2% on Steam, +8% on Industrial and Scientific (p = 0.002), -1% on the enriched MovieLens-1M; after fusion: 0%, 0%, +3% (Steam, p = 0.047), +1%, 0%. Spearman with the ranker 0.66 to 0.77, as with 90 characters. More text helps neither size much.
