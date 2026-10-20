@@ -4,8 +4,9 @@
 
 **A Jev-inspired framework of decision models on knowledge and active graphs for multi-agent recommender systems**
 
-[Paper](#citation) · [Quick start](#quick-start) · [Documentation](docs/) · [Models](#trained-models) · [Reproduce the paper](docs/reproduce_the_paper.md)
+[Paper](http://arxiv.org/abs/2610.26035) · [Quick start](#quick-start) · [Documentation](docs/) · [Models](#trained-models) · [Reproduce the paper](docs/reproduce_the_paper.md)
 
+[![arXiv](https://img.shields.io/badge/arXiv-2610.26035-b31b1b)](http://arxiv.org/abs/2610.26035)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green)
 ![Status](https://img.shields.io/badge/status-research%20code-orange)
@@ -165,12 +166,14 @@ decision4rec/
 
 ## Trained models
 
-The trained decision models are adapters on the Qwen3.5 base models, trained from the released Kev models on real choices of three domains (Video Games, Musical Instruments, Steam). They will be published on Hugging Face with the paper:
+The trained decision models are adapters on the Qwen3.5 base models, trained from the released Kev models on real choices of three domains (Video Games, Musical Instruments, Steam). They are published on Hugging Face:
 
 | Model | Base | Variant |
 |---|---|---|
 | `m-polignano/decision4rec-kev-0.8b` | Qwen/Qwen3.5-0.8B-Base | Decision4Rec-Full |
 | `m-polignano/decision4rec-kev-4b` | Qwen/Qwen3.5-4B-Base | Decision4Rec-Full |
+| `m-polignano/decision4rec-kev-9b` | Qwen/Qwen3.5-9B-Base | Decision4Rec-Full (8,000 records) |
+| `m-polignano/decision4rec-kev-27b` | Qwen/Qwen3.8-27B | Decision4Rec-Full (8,000 records) |
 
 Serve one as any Kev checkpoint:
 
@@ -196,13 +199,19 @@ The hosted Jev runs need your own key (`export TYPESAFE_API_KEY=...`); their ans
 
 ## Citation
 
+The paper is on arXiv: [arXiv:2610.26035](http://arxiv.org/abs/2610.26035).
+
 ```bibtex
-@article{polignano2026decision4rec,
-  title   = {Decision4Rec: A Jev-Inspired Framework of Decision Models on Knowledge and Active Graphs
-             for Multi-Agent Recommender Systems},
-  author  = {Polignano, Marco and Mehta, Het Darshan and Lops, Pasquale and De Luca, Ernesto William
-             and Semeraro, Giovanni},
-  year    = {2026}
+@misc{polignano2026decision4rec,
+  title         = {Decision4Rec: A Jev-Inspired Framework of Decision Models on Knowledge and Active Graphs
+                   for Multi-Agent Recommender Systems},
+  author        = {Polignano, Marco and Mehta, Het Darshan and Lops, Pasquale and De Luca, Ernesto William
+                   and Semeraro, Giovanni},
+  year          = {2026},
+  eprint        = {2610.26035},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.IR},
+  url           = {http://arxiv.org/abs/2610.26035}
 }
 ```
 
