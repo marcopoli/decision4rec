@@ -42,22 +42,7 @@ A commercial model through its API, a released open model and a trained open mod
 
 ## Architecture
 
-```
-          events (new interactions)                catalogue (text, attributes)
-                     │                                        │
-                     ▼                                        ▼
-   ┌────────────────────────────────────────────────────────────────────────────┐
-   │ ActiveGraph runtime: every step is an event in the log (replay, audit)     │
-   │                                                                            │
-   │  (1) Knowledge graph ──statements──►(3) Decision model ──►(4) Fusion ──► top-N
-   │       of the scenario                    exchangeable slot      + Luce model
-   │            │                              ▲   Jev (API), Kev (released or trained),
-   │            ▼                              │   any System One server, a logit LM
-   │  (2) Multi-agent pool ──30 best──────────┘
-   │       SASRecF, transitions, co-purchase, text, popular now,
-   │       shared attributes, best sellers → residual ranker
-   └────────────────────────────────────────────────────────────────────────────┘
-```
+![image](https://raw.githubusercontent.com/marcopoli/decision4rec/refs/heads/main/decision4rec_architecture.png)
 
 | Module | Contract | Code |
 |---|---|---|
