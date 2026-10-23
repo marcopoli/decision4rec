@@ -11,6 +11,7 @@ The same models after fusion with the order that they receive, which is the fina
 | Kev-0.8B, released | 0.0728 | 0.0475 | 0.0785 | 0.0404 | 0.1899 | 0.1950 |
 | Kev-4B, released | 0.0733 | 0.0474 | 0.0799 | 0.0389 | 0.1869 | 0.1950 |
 | Kev-27B, released | 0.0734 | 0.0479 | 0.0790 | 0.0392 | 0.1894 | **0.1972** |
+| d3, released | 0.0738 | 0.0490 | 0.0791 | 0.0398 | 0.1887 | 0.1958 |
 | Kev-0.8B, trained | 0.0741 | 0.0467 | **0.0802** | 0.0401 | 0.1863 | 0.1939 |
 | Kev-4B, trained | **0.0780** | **0.0504** | 0.0801 | **0.0407** | **0.1907** | 0.1968 |
 | **Decision4Rec-KG with logs** |  |  |  |  |  |  |
