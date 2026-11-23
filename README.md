@@ -180,6 +180,7 @@ The trained decision models are adapters on Qwen base models (Qwen3.5 and Qwen3.
 | [`m-polignano/decision4rec-kev-9b-all-seed2`](https://huggingface.co/m-polignano/decision4rec-kev-9b-all-seed2) | Qwen/Qwen3.5-9B-Base | all 34,667 | seed 2 (law of evidence, mean of 3 seeds) |
 | [`m-polignano/decision4rec-kev-0.8b`](https://huggingface.co/m-polignano/decision4rec-kev-0.8b) | Qwen/Qwen3.5-0.8B-Base | all 34,667 | size table, law of evidence |
 | [`m-polignano/decision4rec-kev-4b`](https://huggingface.co/m-polignano/decision4rec-kev-4b) | Qwen/Qwen3.5-4B-Base | all 34,667 | size table, law of evidence |
+| [`m-polignano/decision4rec-kev-27b-all`](https://huggingface.co/m-polignano/decision4rec-kev-27b-all) | Qwen/Qwen3.8-27B | all 34,667 | size table, law of evidence |
 | [`m-polignano/decision4rec-kev-9b`](https://huggingface.co/m-polignano/decision4rec-kev-9b) | Qwen/Qwen3.5-9B-Base | same 8,000 | size table (data-matched) |
 | [`m-polignano/decision4rec-kev-27b`](https://huggingface.co/m-polignano/decision4rec-kev-27b) | Qwen/Qwen3.8-27B | same 8,000 | size table (data-matched) |
 
