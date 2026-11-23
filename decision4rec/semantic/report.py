@@ -20,7 +20,7 @@ from ..eval import metrics as M
 from ..experiments.benchmark import _bench_dir, _ndcg10
 from ..experiments.runner import load_config
 from ..experiments.stratify import POP_BINS, _bucket
-from .facets import embedding_answers, facet_summary, load_schema, read_answers
+from .facets import facet_summary, load_schema, read_answers
 
 MODELS = ("sasrec", "sasrecf", "sasrec_dm", "sasrecf_dm", "sasrecf_emb", "seqrules", "contentknn", "transtext")
 

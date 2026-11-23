@@ -24,7 +24,7 @@ from typing import Optional
 
 import numpy as np
 
-from ..data.schema import Dataset, load_cases
+from ..data.schema import Dataset
 from ..decision.base import DecisionBackend, decide_chunked
 from ..decision.types import Choice
 from ..eval import metrics as M

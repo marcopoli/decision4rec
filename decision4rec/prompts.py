@@ -22,8 +22,13 @@ NULL_STATE = "No interaction history is available for this user."
 class PromptBuilder:
     def __init__(self, ds: Dataset, kg: Optional[ItemKG] = None, hist_len: int = 10, max_facts: int = 3,
                  item_chars: int = 400, profile_hist: int = 30, profile_item_chars: int = 120, max_h: int = 24,
-                 intent_relation: Optional[str] = None, max_intents: int = 10):
+                 intent_relation: Optional[str] = None, max_intents: int = 10, context_marks: str = "",
+                 day: float = 86400.0):
         self.ds, self.kg = ds, kg
+        # V28b: "rating", "days" or "rating+days" adds the user's rating and the days before the request to each
+        # history line; `day` is one day in the dataset's time unit
+        self.context_marks, self.day = set(filter(None, (context_marks or "").split("+"))), day
+        self._rated: Optional[bool] = None
         self.hist_len, self.max_facts, self.item_chars = hist_len, max_facts, item_chars
         self.profile_hist, self.profile_item_chars, self.max_h = profile_hist, profile_item_chars, max_h
         self.max_intents = max_intents
@@ -110,14 +115,39 @@ class PromptBuilder:
             if best:
                 lines.append("Likely next kind of item: " + ", ".join(f"{n} ({p:.2f})" for p, n in best))
         lines.append("User interaction history (oldest to newest):")
+        marks = self.marks(case, drop) if self.context_marks and ratings is None else []
         for n, h in enumerate(hist, 1):
             line = f"{n}. {self.ds.item_text(h, mask_titles)[: self.item_chars]}"
             if ratings is not None and h in ratings:
                 line += f" (rated {int(round(ratings[h]))}/5)"
+            elif marks and marks[n - 1]:
+                line += f" ({marks[n - 1]})"
             lines.append(line)
         if self.ds.user_tag:
             lines.append(f"[user:{case.user}]")
         return "\n".join(lines)
+
+    def marks(self, case: Case, drop: Optional[int] = None) -> list[str]:
+        """Per line of the shown history: the rating the user gave and how many days before the request it came.
+        Empty when the case history is not a prefix of the user's sequence (then nothing is known for sure)."""
+        s, k = self.ds.seqs[case.user], len(case.history)
+        if k == 0 or k > len(s) or any(int(s[i][0]) != case.history[i] for i in range(max(0, k - self.hist_len), k)):
+            return []
+        if self._rated is None:      # ratings carry information only if they vary (Steam has 1.0 everywhere)
+            self._rated = len({float(x[2]) for q in self.ds.seqs[:2000] for x in q}) > 1
+        now = float(s[k - 1][1])
+        out = []
+        for i in range(max(0, k - self.hist_len), k):
+            if int(s[i][0]) == drop:
+                continue
+            m = []
+            if "rating" in self.context_marks and self._rated:
+                m.append(f"rated {int(round(float(s[i][2])))}/5")
+            if "days" in self.context_marks:
+                d = int((now - float(s[i][1])) / self.day)
+                m.append("same day" if d < 1 else f"{d} day{'s' if d > 1 else ''} before")
+            out.append(", ".join(m))
+        return out
 
     def facts(self, case: Case, item: int, evidence: str = "none", mask_titles: bool = False,
               prof: Optional[Profile] = None) -> list[str]:

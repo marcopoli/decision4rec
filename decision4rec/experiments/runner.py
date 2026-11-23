@@ -80,6 +80,10 @@ def case_paths(cfg: dict) -> dict[str, str]:
     rcfg = cfg.get("retriever", {})
     rname = rcfg.get("tag") or rcfg.get("kind", "itemknn")
     stem = os.path.join(cfg["out"], "cases", f"{rname}_track{track}_K{K}_s{seed}")
+    if ev.get("users") == "reserved":   # R1+ cases never share a file name with development cases
+        stem += "_reserved"
+    if ev.get("users") == "ranker":     # C4 labels: the pool's ranker users, cross-fitted
+        stem += "_ranker"
     return {"test": f"{stem}_test{int(ev.get('n_test', 1000))}.jsonl",
             "valid": f"{stem}_valid{int(ev.get('n_valid', 300))}.jsonl", "info": f"{stem}_info.json"}
 
@@ -126,7 +130,23 @@ def get_cases(cfg: dict, ds: Dataset) -> dict[str, list[Case]]:
         only = reserved
     else:
         excluded = excluded | reserved       # development never draws the users reserved for the confirmation
+    split_only = {"test": None, "valid": None}
     retriever = build_retriever(cfg.get("retriever", {}), ds, cfg)
+    if ev.get("users") == "ranker":
+        return _ranker_cases(cfg, ds, retriever, paths, K, seed, pool)
+    if split_only["test"] is not None:
+        test, info_t = build_cases(ds, retriever, "test", len(split_only["test"]), K, track, seed, pool,
+                                   only_users=split_only["test"])
+        valid, info_v = build_cases(ds, retriever, "valid", len(split_only["valid"]), K, track, seed, pool,
+                                    only_users=split_only["valid"])
+        for s, cs in (("test", test), ("valid", valid)):
+            if {c.user for c in cs} != split_only[s]:
+                raise SystemExit(f"{s} cases do not cover the selected users")
+        save_cases(test, paths["test"])
+        save_cases(valid, paths["valid"])
+        with open(paths["info"], "w") as f:
+            json.dump({"test": info_t, "valid": info_v}, f, indent=1)
+        return {"test": test, "valid": valid}
     if ev.get("target"):                    # new-item protocol: test users whose target is after the cutoff
         if ev["target"] != "post":
             raise SystemExit(f"eval.target {ev['target']!r}: only 'post' is supported")
@@ -145,6 +165,46 @@ def get_cases(cfg: dict, ds: Dataset) -> dict[str, list[Case]]:
     return {"test": test, "valid": valid}
 
 
+def _ranker_cases(cfg: dict, ds: Dataset, retriever, paths: dict, K: int, seed: int, depth: int) -> dict[str, list[Case]]:
+    """C4 (docs/r1/c4_prereg.md): cases of the users that trained the pool's ranker, for distillation labels. The ranker
+    knows their answers, so the users are split in two halves (seeded permutation) and each half is ranked by a copy of the
+    pool whose ranker is refit on the other half only (agents.pool.refit, as rectune crossfit). Target: the second to last
+    item (split "valid", as the reader's records). Half 0 is stored as "test", half 1 as "valid"; the two refit rankers are
+    saved next to the cases so a student sees exactly the lists the reader read. No evaluation or reserved user is drawn:
+    ranker users are disjoint from them by construction, and this is asserted."""
+    import numpy as np
+    from ..agents.pool import PoolRetriever, refit
+    if not hasattr(retriever, "pool"):
+        raise SystemExit("eval.users: ranker needs the multi-agent pool as first stage")
+    main = retriever.pool
+    users = [int(u) for u in np.random.default_rng(seed).permutation(main.train_users)]
+    halves = (users[0::2], users[1::2])
+    forbidden = reserved_users(cfg) | _dev_users(cfg)
+    assert not forbidden & set(users), "ranker users overlap the development cases or the reserved users"
+    out, info = {}, {}
+    for k, split in ((0, "test"), (1, "valid")):
+        other = refit(main, halves[1 - k], cfg.get("pool") or {})
+        other.save(f"{paths['info'][:-len('_info.json')]}_ranker{k}.pt")
+        cs, inf = build_cases(ds, PoolRetriever(other), "valid", len(halves[k]), K, "B", seed, depth, only_users=set(halves[k]))
+        assert {c.user for c in cs} <= set(halves[k])
+        out[split], info[split] = cs, inf
+        save_cases(cs, paths[split])
+    with open(paths["info"], "w") as f:
+        json.dump({**info, "halves": [len(h) for h in halves], "ranker_users": len(users)}, f, indent=1)
+    return out
+
+
+def _dev_users(cfg: dict) -> set:
+    """Users of the development test and validation cases of the same config without `eval.users` (the users the
+    students are tested on and the fusion weights are fitted on)."""
+    dev = {**cfg, "eval": {k: v for k, v in cfg["eval"].items() if k != "users"}}
+    dev["eval"]["n_test"], dev["eval"]["n_valid"] = cfg["eval"].get("dev_n_test", 2000), cfg["eval"].get("dev_n_valid", 1000)
+    p = case_paths(dev)
+    if not (os.path.exists(p["test"]) and os.path.exists(p["valid"])):
+        raise SystemExit(f"eval.users: ranker needs the development cases {p['test']} and {p['valid']}")
+    return {c.user for s in ("test", "valid") for c in load_cases(p[s])}
+
+
 def make_prompt_builder(cfg: dict, ds: Dataset, need_kg: bool = True, store=None) -> PromptBuilder:
     """The prompt builder of a config. With an `evidence:` section (or a given store) it is the builder of the
     evidence-reading decision model, which adds the store's statements (docs/08)."""
@@ -152,7 +212,8 @@ def make_prompt_builder(cfg: dict, ds: Dataset, need_kg: bool = True, store=None
     kw = dict(hist_len=int(cfg["eval"].get("hist_len", 10)), max_facts=int(pc.get("max_facts", 3)),
               item_chars=int(pc.get("item_chars", 400)), profile_hist=int(pc.get("profile_hist", 30)),
               profile_item_chars=int(pc.get("profile_item_chars", 120)), max_h=int(pc.get("max_hypotheses", 24)),
-              intent_relation=pc.get("intent_relation"), max_intents=int(pc.get("max_intents", 10)))
+              intent_relation=pc.get("intent_relation"), max_intents=int(pc.get("max_intents", 10)),
+              context_marks=pc.get("context_marks", ""))
     if store is not None or cfg.get("evidence"):
         from ..evidence.prompt import EvidencePromptBuilder
         from ..evidence.store import store_for

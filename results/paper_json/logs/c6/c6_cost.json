@@ -1,0 +1,66 @@
+{
+ "kev-0.8b-rtm_cost ind_rtmcost": {
+  "seconds": 147,
+  "s_per_user": 0.588,
+  "samples": 30,
+  "mean_W": 150.31866666666667,
+  "Wh_per_1000_users": 25.053111111111114,
+  "peak_MiB": 2520.0
+ },
+ "kev-0.8b-rtm_cost vg_rtmcost": {
+  "seconds": 285,
+  "s_per_user": 1.14,
+  "samples": 57,
+  "mean_W": 129.5519298245614,
+  "Wh_per_1000_users": 41.02477777777778,
+  "peak_MiB": 2520.0
+ },
+ "kev-27b-rtm_cost ind_rtmcost": {
+  "seconds": 1019,
+  "s_per_user": 4.076,
+  "samples": 202,
+  "mean_W": 86.04584158415841,
+  "Wh_per_1000_users": 96.56255555555555,
+  "peak_MiB": 63398.0
+ },
+ "kev-27b-rtm_cost vg_rtmcost": {
+  "seconds": 925,
+  "s_per_user": 3.7,
+  "samples": 184,
+  "mean_W": 86.21913043478261,
+  "Wh_per_1000_users": 88.13511111111112,
+  "peak_MiB": 63687.0
+ },
+ "kev-4b-rtm_cost ind_rtmcost": {
+  "seconds": 261,
+  "s_per_user": 1.044,
+  "samples": 53,
+  "mean_W": 226.4632075471698,
+  "Wh_per_1000_users": 66.68083333333334,
+  "peak_MiB": 10444.0
+ },
+ "kev-4b-rtm_cost vg_rtmcost": {
+  "seconds": 291,
+  "s_per_user": 1.164,
+  "samples": 58,
+  "mean_W": 207.4437931034483,
+  "Wh_per_1000_users": 66.843,
+  "peak_MiB": 10444.0
+ },
+ "kev-9b-rtm_cost ind_rtmcost": {
+  "seconds": 477,
+  "s_per_user": 1.908,
+  "samples": 96,
+  "mean_W": 234.06427083333332,
+  "Wh_per_1000_users": 124.83427777777777,
+  "peak_MiB": 19490.0
+ },
+ "kev-9b-rtm_cost vg_rtmcost": {
+  "seconds": 400,
+  "s_per_user": 1.6,
+  "samples": 80,
+  "mean_W": 235.502875,
+  "Wh_per_1000_users": 104.66794444444444,
+  "peak_MiB": 19490.0
+ }
+}

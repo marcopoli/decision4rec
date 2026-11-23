@@ -16,10 +16,11 @@ For each candidate the pool also keeps which agents found it, written as one mor
 
 from __future__ import annotations
 
+import glob
 import json
 import os
 from collections import Counter
-from typing import Optional
+from typing import NamedTuple, Optional
 
 import numpy as np
 
@@ -28,10 +29,22 @@ from ..data.schema import Dataset
 AGENTS = ("sasrecf", "evidence", "after", "with", "text", "lately", "kg", "pop")
 NAMES = {"sasrecf": "sequence model", "evidence": "evidence", "after": "transitions", "with": "co-purchase",
          "text": "text", "lately": "popular now", "kg": "shared attributes", "pop": "best sellers",
+         # other trained sequence models, when the config lists them under `pool.extra`
+         "sasrec": "second sequence model", "gru4rec": "third sequence model",
+         "sasrecf_s14": "fourth sequence model", "sasrecf_s15": "fifth sequence model",
          # perspective agents of the knowledge graph (version 4, decision4rec.agents.kgperspectives), when enabled
          "complement": "complement", "continuation": "continuation", "loyalty": "same maker",
-         "replenishment": "replenishment", "exploration": "exploration"}
+         "replenishment": "replenishment", "exploration": "exploration",
+         # generators of rare items (step 0 of A5/A6, rung 2), when the config sets `pool.rare`
+         "rare_text": "rare, text neighbours", "rare_kg": "rare, shared attributes"}
+RARE_AGENTS = ("rare_text", "rare_kg")
 Z_COL = 2 * len(AGENTS)                     # without perspective agents; AgentPool.zcol in general
+
+
+class SeqRow(NamedTuple):
+    """The scores of one user: the sequence model of the pool, and the other trained sequence models (`pool.extra`)."""
+    main: np.ndarray
+    extra: dict
 
 
 def persp_names() -> list[str]:
@@ -52,13 +65,20 @@ def kg_agent(kg, history: list[int], k: int) -> list[int]:
 
 
 class AgentPool:
-    def __init__(self, ds: Dataset, store, scorer=None, kg=None, depth: int = 20, seq_depth: int = 50, persp=None):
+    def __init__(self, ds: Dataset, store, scorer=None, kg=None, depth: int = 20, seq_depth: int = 50, persp=None,
+                 extra: Optional[dict] = None, rare: Optional[dict] = None):
         self.ds, self.store, self.scorer, self.kg = ds, store, scorer, kg
+        self.rare = rare                             # {depth, below}: rare-item agents (rung 2 of A5/A6) or None
         self.persp = persp                           # KGPerspectives or None
-        self.agents = AGENTS + (tuple(persp_names()) if persp is not None else ())
+        self.extra = extra or {}                     # other trained sequence models: name -> scorer
+        self.agents = AGENTS + (tuple(persp_names()) if persp is not None else ()) + (RARE_AGENTS if rare else ()) + tuple(self.extra)
+        if rare:
+            self._R = np.flatnonzero(store.pop < int(rare.get("below", 20)))
+            self._UR = store.unit[self._R] if store.unit is not None else None
         self.zcol = 2 * len(self.agents)
         self.hidden = 0                              # 0: linear residual; > 0: one hidden layer
         self.persp_slots = 0                         # slots of the top k reserved for perspective candidates
+        self.rare_slots = 0                          # rung 3 of A5/A6: slots reserved for the rare agents' best items
         self.persp_profile = False                   # version 5a features
         self.sasrecf_cands = False                   # ablation: candidates = SASRecF's best items, as many as the pool
         self.depth, self.seq_depth = depth, seq_depth
@@ -70,31 +90,70 @@ class AgentPool:
         self._found: dict = {}
 
     # ---- agents and features ----------------------------------------------------
-    def _sasrec_rows(self, users: list[int], histories: list[list[int]]) -> Optional[np.ndarray]:
-        if self.scorer is None:
-            return None
+    @staticmethod
+    def _unseen(scorer, users: list[int], histories: list[list[int]]) -> np.ndarray:
         import torch
         with torch.no_grad():
-            m = self.scorer.scores(users, histories).cpu().numpy().astype(np.float64)
+            m = scorer.scores(users, histories).cpu().numpy().astype(np.float64)
         for r, h in enumerate(histories):
             m[r, np.asarray(h, dtype=int)] = -np.inf
         return m
 
-    def lists(self, history: list[int], now, row: Optional[np.ndarray]) -> dict[str, list[int]]:
+    def _sasrec_rows(self, users: list[int], histories: list[list[int]]):
+        if self.scorer is None:
+            return None
+        m = self._unseen(self.scorer, users, histories)
+        if not self.extra:
+            return m
+        other = {a: self._unseen(sc, users, histories) for a, sc in self.extra.items()}
+        return [SeqRow(m[r], {a: other[a][r] for a in other}) for r in range(len(users))]
+
+    def lists(self, history: list[int], now, row) -> dict[str, list[int]]:
+        main, other = row if isinstance(row, SeqRow) else (row, {})
         seen = set(history)
         g = self.store.generators(history, now)
-        out = {"sasrecf": [int(j) for j in np.argsort(-row)[: self.seq_depth]] if row is not None else [],
+        out = {"sasrecf": [int(j) for j in np.argsort(-main)[: self.seq_depth]] if main is not None else [],
                "evidence": self.store.candidates(history, now, self.depth)}
+        for a, e in other.items():
+            out[a] = [int(j) for j in np.argsort(-e)[: self.depth]]
         for a in ("after", "with", "text", "lately"):
             out[a] = [j for j in g[a] if j not in seen][: self.depth]
         out["kg"] = kg_agent(self.kg, history, self.depth) if self.kg is not None else []
         out["pop"] = [j for j in self.popular if j not in seen][: self.depth]
         if self.persp is not None:
             out.update(self.persp.lists(history, now, self.depth, g=g))
+        if self.rare:
+            out.update(self.rare_lists(history))
         return out
 
-    def features(self, history: list[int], now, row: Optional[np.ndarray]):
+    def rare_lists(self, history: list[int]) -> dict[str, list[int]]:
+        """Rare items only (fewer than `below` purchases): text neighbours of the last three items, merged by best
+        similarity, and items sharing catalogue attributes with them, idf-weighted, no cap on attribute size."""
+        k, seen, R, UR = int(self.rare.get("depth", 200)), set(history), self._R, self._UR
+        best = {}
+        if UR is not None and len(R):
+            for i in history[-3:]:
+                s = UR @ self.store.unit[i]
+                top = np.argpartition(-s, min(len(s) - 1, k + 3))[: k + 3]
+                for t in top:
+                    j = int(R[t])
+                    if j not in seen and s[t] > best.get(j, -9.0):
+                        best[j] = float(s[t])
+        g = Counter()
+        if self.kg is not None:
+            for i in history[-3:]:
+                for key in sorted(self.kg.attrs[i]):
+                    w = self.kg.idf.get(key)
+                    if w:
+                        for j in self.kg.ent_items[key]:
+                            if j not in seen and self.store.pop[j] < int(self.rare.get("below", 20)):
+                                g[j] += w
+        return {"rare_text": sorted(best, key=lambda j: (-best[j], j))[:k],
+                "rare_kg": [j for j, _ in sorted(g.items(), key=lambda t: (-t[1], t[0]))[:k]]}
+
+    def features(self, history: list[int], now, row):
         L = self.lists(history, now, row)
+        row, other = row if isinstance(row, SeqRow) else (row, {})
         pool = list(dict.fromkeys(j for a in self.agents for j in L[a]))
         if self.sasrecf_cands and row is not None:   # same size, same features: tests candidates against signals
             pool = [int(j) for j in np.argsort(-row, kind="stable")[: len(pool)]]
@@ -118,7 +177,10 @@ class AgentPool:
             if prof is not None:                         # version 5a: membership weighted by the user's own mode
                 f += [(0.0 if pos[a].get(j) is None else 1.0 / (1.0 + pos[a][j])) * prof[q] for q, a in enumerate(PN)]
             X.append(f)
-        return pool, np.asarray(X, dtype=np.float32), pos
+        X = np.asarray(X, dtype=np.float32)
+        if other:                                        # the z-score of each other sequence model, last columns
+            X = np.column_stack([X] + [(e[pool] - e[pool].mean()) / (e[pool].std() + 1e-9) for e in other.values()]).astype(np.float32)
+        return pool, X, pos
 
     # ---- residual ranker -------------------------------------------------------
     def _net(self, d: int, hidden: int = 0):
@@ -239,6 +301,14 @@ class AgentPool:
                           key=lambda i: (min(pos[a].get(pool[i], 10 ** 6) for a in P), -s[i]))
             order = keep + best[: self.persp_slots]
             order += [i for i in np.argsort(-s, kind="stable") if i not in set(order)][: k - len(order)]
+        if self.rare_slots and self.rare:
+            idx = {j: i for i, j in enumerate(pool)}
+            keep = order[: k - self.rare_slots]
+            shown = set(keep)
+            best = sorted({idx[j] for a in RARE_AGENTS for j in pos[a] if idx[j] not in shown},
+                          key=lambda i: (min(pos[a].get(pool[i], 10 ** 6) for a in RARE_AGENTS), -s[i]))
+            order = keep + best[: self.rare_slots]
+            order += [i for i in np.argsort(-s, kind="stable") if i not in set(order)][: k - len(order)]
         items = [pool[i] for i in order]
         self._found[(user, len(history))] = {j: {a: pos[a][j] for a in self.agents if j in pos[a]} for j in items}
         return items, s[order]
@@ -250,15 +320,16 @@ class AgentPool:
         parts = []
         for a in self.agents:
             if a in hits:
-                parts.append(f"{NAMES[a]} #{hits[a] + 1}" if a == "sasrecf" else NAMES[a])
+                parts.append(f"{NAMES[a]} #{hits[a] + 1}" if a == "sasrecf" or a in self.extra else NAMES[a])
         return "found by " + ", ".join(parts)
 
 
 def refit(pool: AgentPool, users: list[int], pc: dict) -> AgentPool:
     """A copy of `pool` (same agents, store, scorer and settings) whose residual ranker is trained on `users` only.
     Used to cross-fit training records: a user's candidates come from a ranker that never saw that user."""
-    p2 = AgentPool(pool.ds, pool.store, pool.scorer, pool.kg, pool.depth, pool.seq_depth, pool.persp)
+    p2 = AgentPool(pool.ds, pool.store, pool.scorer, pool.kg, pool.depth, pool.seq_depth, pool.persp, pool.extra, pool.rare)
     p2.hidden, p2.persp_slots, p2.persp_profile = pool.hidden, pool.persp_slots, pool.persp_profile
+    p2.rare_slots = pool.rare_slots
     p2.sasrecf_cands = pool.sasrecf_cands
     p2.fit(users, lams=tuple(float(x) for x in pc.get("lams", (0.1, 0.3, 1.0, 3.0))), steps=int(pc.get("steps", 400)))
     return p2
@@ -292,10 +363,30 @@ class PoolRetriever:
 _POOLS: dict = {}
 
 
+def _trained(out: str, name: str) -> str:
+    """Checkpoint folder of a baseline of a setting: `sasrecf_s14` is SASRecF of training seed 14, stored apart."""
+    if "_s" in name:
+        base, seed = name.rsplit("_", 1)
+        hits = sorted(glob.glob(os.path.join(out, f"baselines_{seed}", base, "*", "model.pt")))
+    else:
+        for path in sorted(glob.glob(os.path.join(out, "benchmark", "*", f"{name}.json"))):
+            with open(path) as f:
+                folder = json.load(f).get("dir")
+            if folder:
+                return folder
+        hits = sorted(glob.glob(os.path.join(out, "baselines", name, "*", "model.pt")))
+    if not hits:
+        raise SystemExit(f"no trained {name} in {out}")
+    return os.path.dirname(hits[0])
+
+
 def pool_for(cfg: dict, ds: Dataset) -> AgentPool:
     """The pool of a config (section `pool:`), trained once and cached next to the config's runs.
 
         pool: {ref: configs/small/vg_semantic.yaml, model: sasrecf, users: 15000, seed: 11}
+
+    `extra: [sasrec, gru4rec]` adds other trained sequence models as agents, and `users_of: <tag>` trains the ranker on
+    the users of the pool of that tag, so that the two pools can be compared and the same training records stay valid.
     """
     from ..evidence.store import store_for
     from ..experiments.benchmark import prepare_dataset
@@ -319,8 +410,15 @@ def pool_for(cfg: dict, ds: Dataset) -> AgentPool:
     if pc.get("perspectives") == "kg":
         from .kgperspectives import KGPerspectives
         persp = KGPerspectives(ds, store, kind_depth=pc.get("kind_depth"))
-    pool = AgentPool(ds, store, scorer, ItemKG(ds), int(pc.get("depth", 20)), int(pc.get("seq_depth", 50)), persp)
+    extra = {name: B.load(name.rsplit("_", 1)[0] if "_s" in name else name, _trained(cfg["out"], name), ds, pc.get("device", "cpu"))
+             for name in pc.get("extra", ())}
+    pool = AgentPool(ds, store, scorer, ItemKG(ds), int(pc.get("depth", 20)), int(pc.get("seq_depth", 50)), persp, extra,
+                     pc.get("rare"))
     tag = f"pool_{pc.get('model', 'none') if pc.get('ref') else 'none'}_u{int(pc.get('users', 15000))}_s{int(pc.get('seed', 11))}"
+    if extra:
+        tag += "_x" + "-".join(extra)
+    if pc.get("rare"):
+        tag += f"_r{int(pc['rare'].get('depth', 200))}b{int(pc['rare'].get('below', 20))}"
     if persp is not None:
         tag += "_kgp" + (f"_k{int(pc['kind_depth'])}" if pc.get("kind_depth") else "")
     lams = tuple(float(x) for x in pc.get("lams", (0.1, 0.3, 1.0, 3.0)))
@@ -329,6 +427,7 @@ def pool_for(cfg: dict, ds: Dataset) -> AgentPool:
         tag += f"_l{'-'.join(f'{x:g}' for x in lams)}_t{steps}"
     pool.hidden = int(pc.get("hidden", 0))
     pool.persp_slots = int(pc.get("persp_slots", 0))      # used at ranking time only: the ranker is the same
+    pool.rare_slots = int((pc.get("rare") or {}).get("slots", 0))
     pool.persp_profile = bool(pc.get("persp_profile", False))
     if pool.persp_profile:
         tag += "_prof"
@@ -342,10 +441,15 @@ def pool_for(cfg: dict, ds: Dataset) -> AgentPool:
         pool.load(path)
     else:
         from ..data.candidates import planned_users
-        excluded = _case_users(cfg) | planned_users(ds, cfg["eval"])   # also the cases this config will draw
+        from ..data.reserved import reserved_users
+        excluded = _case_users(cfg) | planned_users(ds, cfg["eval"], reserved_users(cfg))   # also the cases this config will draw
         rng = np.random.default_rng(int(pc.get("seed", 11)))
         users = [u for u in rng.permutation(ds.n_users).tolist() if u not in excluded and len(ds.seqs[u]) >= 4]
-        info = pool.fit(users[: int(pc.get("users", 15000))], lams=lams, steps=steps)
+        users = users[: int(pc.get("users", 15000))]
+        if pc.get("users_of"):
+            import torch
+            users = [int(u) for u in torch.load(os.path.join(cfg["out"], "pool", f"{pc['users_of']}.pt"), weights_only=False)["train_users"]]
+        info = pool.fit(users, lams=lams, steps=steps)
         pool.save(path)
         with open(path.replace(".pt", ".json"), "w") as f:
             json.dump(info, f, indent=1)

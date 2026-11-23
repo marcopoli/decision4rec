@@ -1,0 +1,110 @@
+{
+ "model": "M4",
+ "a": 0.2477315645411112,
+ "b": -0.10562372166600768,
+ "k": 2.0,
+ "loso_errors": [
+  0.02128008803980376,
+  0.015882862477857182,
+  0.019449534074263107,
+  0.014130870940434637,
+  -0.033318991702795064,
+  -0.026920706417318238
+ ],
+ "interval_q": [
+  -0.03011984906005665,
+  0.020364811057033434
+ ],
+ "scenarios": {
+  "cds_rtm": {
+   "config": "configs/small/cds_rtm.yaml",
+   "dataset": "data/processed/cds_vinyl",
+   "valid": {
+    "cases": "runs/small/cds/cases/pool_trackB_K30_s13_valid1000.jsonl",
+    "n": 1000,
+    "in30": 230,
+    "share_in30": 0.23,
+    "median_before": 12.999999999999998,
+    "share_x_below_k": 0.9130434782608695,
+    "forecast": 0.13510197294782705,
+    "interval80": [
+     0.1049821238877704,
+     0.1554667840048605
+    ]
+   },
+   "test": {
+    "cases": "runs/small/cds/cases/pool_trackB_K30_s13_test5000.jsonl",
+    "n": 5000,
+    "in30": 967,
+    "share_in30": 0.1934,
+    "median_before": 14.000000000000004,
+    "share_x_below_k": 0.9038262668045501,
+    "forecast": 0.13320454009209634,
+    "interval80": [
+     0.10308469103203968,
+     0.15356935114912978
+    ]
+   }
+  },
+  "toys_rtm": {
+   "config": "configs/small/toys_rtm.yaml",
+   "dataset": "data/processed/toys_games",
+   "valid": {
+    "cases": "runs/small/toys/cases/pool_trackB_K30_s13_valid1000.jsonl",
+    "n": 1000,
+    "in30": 111,
+    "share_in30": 0.111,
+    "median_before": 10.000000000000002,
+    "share_x_below_k": 0.9279279279279279,
+    "forecast": 0.14113955552973714,
+    "interval80": [
+     0.11101970646968048,
+     0.1615043665867706
+    ]
+   },
+   "test": {
+    "cases": "runs/small/toys/cases/pool_trackB_K30_s13_test5000.jsonl",
+    "n": 5000,
+    "in30": 465,
+    "share_in30": 0.093,
+    "median_before": 9.0,
+    "share_x_below_k": 0.9204301075268817,
+    "forecast": 0.13605240432062604,
+    "interval80": [
+     0.10593255526056938,
+     0.15641721537765949
+    ]
+   }
+  },
+  "sw_rtm": {
+   "config": "configs/small/sw_rtm.yaml",
+   "dataset": "data/processed/software",
+   "valid": {
+    "cases": "runs/small/sw/cases/pool_trackB_K30_s13_valid1000.jsonl",
+    "n": 1000,
+    "in30": 368,
+    "share_in30": 0.368,
+    "median_before": 419.4999999999999,
+    "share_x_below_k": 0.27445652173913043,
+    "forecast": 0.07621393112059108,
+    "interval80": [
+     0.046094082060534426,
+     0.09657874217762451
+    ]
+   },
+   "test": {
+    "cases": "runs/small/sw/cases/pool_trackB_K30_s13_test5000.jsonl",
+    "n": 5000,
+    "in30": 1654,
+    "share_in30": 0.3308,
+    "median_before": 374.0,
+    "share_x_below_k": 0.313180169286578,
+    "forecast": 0.07504152249374506,
+    "interval80": [
+     0.04492167343368841,
+     0.09540633355077849
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,182 @@
+{
+ "model": "M5_all9",
+ "a": 0.17930053760865378,
+ "b": -0.044656766995380064,
+ "c": -0.13100292478710504,
+ "k": 2.5,
+ "source": "logs/probe/l2_explore.json",
+ "loso_errors": [
+  0.035939486362368864,
+  0.006309362746170916,
+  0.021640842574085363,
+  0.003775247281457478,
+  0.00901586512068037,
+  0.011413894196509199,
+  -0.09759997336553423,
+  0.03394843895615142,
+  -0.028806902702905073
+ ],
+ "interval_q": [
+  -0.0425655168354309,
+  0.034346648437394905
+ ],
+ "naive_all9": 0.06606720120615335,
+ "scenarios": {
+  "baby_rtm": {
+   "config": "configs/small/baby_rtm.yaml",
+   "dataset": "data/processed/baby_products",
+   "valid": {
+    "cases": "runs/small/baby/cases/pool_trackB_K30_s13_valid1000.jsonl",
+    "n": 1000,
+    "in30": 106,
+    "share_in30": 0.106,
+    "forecast": 0.07338634021789328,
+    "interval80": [
+     0.03082082338246238,
+     0.10773298865528819
+    ]
+   },
+   "test": {
+    "cases": "runs/small/baby/cases/pool_trackB_K30_s13_test5000.jsonl",
+    "n": 5000,
+    "in30": 503,
+    "share_in30": 0.1006,
+    "forecast": 0.07465106972940294,
+    "interval80": [
+     0.03208555289397204,
+     0.10899771816679785
+    ]
+   }
+  },
+  "pet_rtm": {
+   "config": "configs/small/pet_rtm.yaml",
+   "dataset": "data/processed/pet_supplies",
+   "valid": {
+    "cases": "runs/small/pet/cases/pool_trackB_K30_s13_valid1000.jsonl",
+    "n": 1000,
+    "in30": 101,
+    "share_in30": 0.101,
+    "forecast": 0.08480480057696918,
+    "interval80": [
+     0.04223928374153828,
+     0.11915144901436409
+    ]
+   },
+   "test": {
+    "cases": "runs/small/pet/cases/pool_trackB_K30_s13_test5000.jsonl",
+    "n": 5000,
+    "in30": 467,
+    "share_in30": 0.0934,
+    "forecast": 0.08241989451142429,
+    "interval80": [
+     0.03985437767599338,
+     0.11676654294881919
+    ]
+   }
+  },
+  "groc_rtm": {
+   "config": "configs/small/groc_rtm.yaml",
+   "dataset": "data/processed/grocery_food",
+   "valid": {
+    "cases": "runs/small/groc/cases/pool_trackB_K30_s13_valid1000.jsonl",
+    "n": 1000,
+    "in30": 95,
+    "share_in30": 0.095,
+    "forecast": 0.09916784491946937,
+    "interval80": [
+     0.056602328084038464,
+     0.13351449335686427
+    ]
+   },
+   "test": {
+    "cases": "runs/small/groc/cases/pool_trackB_K30_s13_test5000.jsonl",
+    "n": 5000,
+    "in30": 477,
+    "share_in30": 0.0954,
+    "forecast": 0.09488699013246167,
+    "interval80": [
+     0.05232147329703077,
+     0.1292336385698566
+    ]
+   }
+  },
+  "arts_rtm": {
+   "config": "configs/small/arts_rtm.yaml",
+   "dataset": "data/processed/arts_crafts",
+   "valid": {
+    "cases": "runs/small/arts/cases/pool_trackB_K30_s13_valid1000.jsonl",
+    "n": 1000,
+    "in30": 122,
+    "share_in30": 0.122,
+    "forecast": 0.10061717419035349,
+    "interval80": [
+     0.058051657354922584,
+     0.1349638226277484
+    ]
+   },
+   "test": {
+    "cases": "runs/small/arts/cases/pool_trackB_K30_s13_test5000.jsonl",
+    "n": 5000,
+    "in30": 512,
+    "share_in30": 0.1024,
+    "forecast": 0.1001479519773521,
+    "interval80": [
+     0.0575824351419212,
+     0.134494600414747
+    ]
+   }
+  },
+  "ml32m_rtm": {
+   "config": "configs/small/ml32m_rtm.yaml",
+   "dataset": "data/processed/ml32m",
+   "valid": {
+    "cases": "runs/small/ml32m/cases/pool_trackB_K30_s13_valid1000.jsonl",
+    "n": 1000,
+    "in30": 429,
+    "share_in30": 0.429,
+    "forecast": 0.014912464145369382,
+    "interval80": [
+     -0.02765305269006152,
+     0.04925911258276429
+    ]
+   },
+   "test": {
+    "cases": "runs/small/ml32m/cases/pool_trackB_K30_s13_test5000.jsonl",
+    "n": 5000,
+    "in30": 1871,
+    "share_in30": 0.3742,
+    "forecast": 0.02372821332893015,
+    "interval80": [
+     -0.018837303506500754,
+     0.05807486176632505
+    ]
+   }
+  },
+  "mind_rtm": {
+   "config": "configs/small/mind_rtm.yaml",
+   "dataset": "data/processed/mind_small",
+   "valid": {
+    "cases": "runs/small/mind/cases/pool_trackB_K30_s13_valid1000.jsonl",
+    "n": 1000,
+    "in30": 374,
+    "share_in30": 0.374,
+    "forecast": 0.022285021888039012,
+    "interval80": [
+     -0.02028049494739189,
+     0.05663167032543392
+    ]
+   },
+   "test": {
+    "cases": "runs/small/mind/cases/pool_trackB_K30_s13_test5000.jsonl",
+    "n": 5000,
+    "in30": 1765,
+    "share_in30": 0.353,
+    "forecast": 0.026582419959661718,
+    "interval80": [
+     -0.015983096875769185,
+     0.06092906839705663
+    ]
+   }
+  }
+ }
+}

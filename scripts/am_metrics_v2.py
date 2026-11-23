@@ -4,9 +4,9 @@ outside the 30 counts as a miss. Self-check: NDCG@10 from these ranks equals equ
 import json
 import numpy as np
 from equivalence_ci import fused
-from jev4rec.data.schema import load_cases
-from jev4rec.experiments.asc import GAMMAS, SPLITS, _theta, _tune, _z
-from jev4rec.experiments.runner import case_paths
+from decision4rec.data.schema import load_cases
+from decision4rec.experiments.asc import GAMMAS, SPLITS, _theta, _tune, _z
+from decision4rec.experiments.runner import case_paths
 
 def ranks(d, conf, tag, arm):
     rd = f"runs/small/{d}/{d}_{conf}_{tag}"

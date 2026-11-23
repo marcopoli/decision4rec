@@ -295,8 +295,8 @@ def _ndcg10(ranks: np.ndarray) -> float:
 
 # ---- training --------------------------------------------------------------
 
-def _valid_set(ds: Dataset, rng: np.random.Generator, n: int):
-    users = [u for u in range(ds.n_users) if len(ds.seqs[u]) >= 3]
+def _valid_set(ds: Dataset, rng: np.random.Generator, n: int, skip: Optional[set] = None):
+    users = [u for u in range(ds.n_users) if len(ds.seqs[u]) >= 3 and not (skip and u in skip)]
     if len(users) > n:
         users = sorted(rng.choice(users, n, replace=False).tolist())
     return users, [[int(x[0]) for x in ds.seqs[u][:-2]] for u in users], [int(ds.seqs[u][-2][0]) for u in users]
@@ -304,18 +304,22 @@ def _valid_set(ds: Dataset, rng: np.random.Generator, n: int):
 
 def fit(name: str, ds: Dataset, out_dir: str, hp: Optional[dict] = None, epochs: int = 300, patience: int = 10,
         seed: int = 13, device: Optional[str] = None, eval_users: int = 10000, n_sampled: int = 0,
-        max_full_softmax: int = 60000) -> dict:
+        max_full_softmax: int = 60000, extra_targets: Optional[set] = None) -> dict:
     """Train one configuration, keep the checkpoint with the best validation NDCG@10.
 
     The training budget follows the convention of the RecBole library, which most recent recommender
     papers adopt: at most 300 epochs, Adam, validation after every epoch, and early stopping after
-    10 validations without improvement. Models are trained one at a time."""
+    10 validations without improvement. Models are trained one at a time.
+
+    `extra_targets`: users whose second-to-last item is also trained on (and who leave the validation users). The
+    ranker of the pool and the decision models learn from these items, so this control gives the sequence model the
+    same targets (R1 plan)."""
     hp = dict(hp or {})
     device = auto_device(device)
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
     os.makedirs(out_dir, exist_ok=True)
-    vu, vh, vt = _valid_set(ds, rng, eval_users)
+    vu, vh, vt = _valid_set(ds, rng, eval_users, extra_targets)
     if name in TRAINING_FREE:
         info = {"model": name, "hp": hp, "best_valid_ndcg10": _ndcg10(Scorer(name, ds, hp=hp).ranks(vu, vh, vt)),
                 "best_epoch": 0}
@@ -327,7 +331,7 @@ def fit(name: str, ds: Dataset, out_dir: str, hp: Optional[dict] = None, epochs:
     lr, reg = float(hp.get("lr", 1e-3)), float(hp.get("reg", 0.0))
     opt = torch.optim.Adam(model.parameters(), lr=lr)
     epochs, patience = int(hp.get("epochs", epochs)), int(hp.get("patience", patience))
-    train = [[int(x[0]) for x in s[:-2]] for s in ds.seqs]
+    train = [[int(x[0]) for x in (s[:-1] if extra_targets and u in extra_targets else s[:-2])] for u, s in enumerate(ds.seqs)]
     if n_sampled == 0 and ds.n_items > max_full_softmax:
         n_sampled = 4096
     if name in COLLABORATIVE:

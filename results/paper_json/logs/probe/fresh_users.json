@@ -1,0 +1,47 @@
+{
+ "vg": {
+  "dataset": "video_games",
+  "users": 94745,
+  "eligible": 94745,
+  "in_cases": 6691,
+  "ranker": 15000,
+  "records": 29265,
+  "fresh": 49024
+ },
+ "mi": {
+  "dataset": "musical_instruments",
+  "users": 57432,
+  "eligible": 57432,
+  "in_cases": 6932,
+  "ranker": 15000,
+  "records": 11609,
+  "fresh": 27585
+ },
+ "steam": {
+  "dataset": "steam",
+  "users": 99571,
+  "eligible": 99571,
+  "in_cases": 3000,
+  "ranker": 15000,
+  "records": 31206,
+  "fresh": 55229
+ },
+ "ind": {
+  "dataset": "industrial_scientific",
+  "users": 50985,
+  "eligible": 50985,
+  "in_cases": 3000,
+  "ranker": 15000,
+  "records": 5165,
+  "fresh": 29400
+ },
+ "ml1m": {
+  "dataset": "ml-1m",
+  "users": 6040,
+  "eligible": 6040,
+  "in_cases": 3000,
+  "ranker": 3000,
+  "records": 1606,
+  "fresh": 40
+ }
+}

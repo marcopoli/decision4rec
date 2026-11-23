@@ -28,6 +28,7 @@ class Arm:
     m: int = 0                  # block size, 0 means the whole pool in one block
     rounds: int = 1             # independent random partitions of the pool
     adaptive: int = 0           # extra rounds that re-compare the current head of the ranking
+    head: int = 0               # items of each adaptive round, 0 = the larger of 2 x top_k and the block size
     outside: bool = False       # add the outside option to every block
     evidence: str = "none"      # kinds joined by '+': pref (decision-estimated preference paths), kg, cf
     profile: str = "none"       # none | count (attribute frequencies) | decision (model-estimated edges)
@@ -114,7 +115,7 @@ def luce_observations(backend: DecisionBackend, pb: PromptBuilder, case: Case, a
     obs = extend_observations(backend, pb, case, arm, state, rng, cost, [], list(range(K)), m, prof)
     for _ in range(arm.adaptive):
         theta = fit_luce(obs, K).theta
-        head = np.argsort(-theta)[: max(2 * arm.top_k, m)]
+        head = np.argsort(-theta)[: arm.head or max(2 * arm.top_k, m)]
         if len(head) < 2:
             break
         obs = obs + _ask(backend, pb, case, arm, state, random_partition(head, m, rng), cost, prof)

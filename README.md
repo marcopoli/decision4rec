@@ -61,6 +61,24 @@ The three variants studied in the paper share these modules:
 
 ## Results at a glance
 
+**Version 2 (November 2026).** Confirmation on users never used in development, with the analysis plan frozen (SHA-256) before scoring. NDCG@10, full-catalogue ranking; trained Kev-9B reader, mean of three seeds; Holm correction inside each family.
+
+| Domain (10,000 reserved users each) | Best trained baseline (SASRecF+) | Decision4Rec-Full | vs baseline | vs its own list |
+|---|---|---|---|---|
+| Video Games | 0.0478 | 0.0608 | +27.2% | +9.3% |
+| Musical Instruments | 0.0278 | 0.0375 | +34.8% | +7.4% |
+| Steam | 0.0613 | 0.0649 | +6.0% | +8.2% |
+| Industrial & Scientific (never used to train the reader) | 0.0263 | 0.0326 | +23.9% | +8.1% |
+
+All differences are significant after the Holm correction (p < 0.01). Decision4Rec-Full is also above every UniSRec variant in 15 of 15 settings.
+
+**A law of evidence.** The information that a trained reader adds to the list, in nats per choice, falls with the logarithm of the earlier purchases of the target: -0.039 to -0.095 nats per tenfold on reserved users (Holm p <= 0.002). The law holds for every trained reader, also a plain language model trained the same way; it holds in time on a stream replayed on the ActiveGraph runtime; masking item titles costs rare targets while dropping the statements costs popular ones. A blind forecast of the size of the gain in nine unseen scenarios ordered them well but failed its pre-registered bar, and is reported as a failure.
+
+The tables and figures of version 2 are generated from the result files in `results/paper_json/` by `scripts/paper_tables.py` and `scripts/paper_figs.py`; `scripts/claims_audit.py` checks every number of the text against these files.
+
+<details>
+<summary>Development results of version 1 (2,000 development test users per domain)</summary>
+
 NDCG@10 on 2,000 development test users per domain (full-catalogue ranking, leave-one-out). Industrial and Scientific is **never seen** when training the decision model.
 
 | System | Video Games | Musical Instr. | Steam | Industrial & Sci. |
@@ -71,6 +89,8 @@ NDCG@10 on 2,000 development test users per domain (full-catalogue ranking, leav
 | Decision4Rec-Full, trained Kev-4B | **0.0780** | **0.0504** | 0.0801 | **0.0407** |
 
 The contribution of the decision model grows with its size; the paper reports the full analysis, the commercial Jev, MovieLens-1M and the controls.
+
+</details>
 
 ## Installation
 
@@ -168,7 +188,7 @@ uv run --extra serve python -m kev.serve --run m-polignano/decision4rec-kev-4b -
 
 ## Reproducing the paper
 
-Every number of the paper comes from one stage of `scripts/setting.sh` and one report under `runs/small/`. The mapping from tables to stages, the hardware, the run times and the random seeds are in [docs/reproduce_the_paper.md](docs/reproduce_the_paper.md). The development and test users of every domain are fixed by seeds and can be rebuilt exactly; their identifiers will also be released.
+Every number of the paper comes from one stage of `scripts/setting.sh` and one report under `runs/small/`. For version 2, the scoring scripts write the JSON files of `results/paper_json/` (confirmation: `scripts/r1_score.py`; law: `scripts/thin_probe.py law`; forecast: `scripts/forecast_predict.py`, `scripts/l2b_score.py`; stream replay on ActiveGraph: `scripts/c2_stream.py`, `scripts/c2_score.py`; mechanism: `scripts/mechanism.py`; accounting: `scripts/accounting.py`; UniSRec: `scripts/b5_unisrec.py`, `scripts/b5_score.py`; levers: `scripts/fusion_table.py`; cost: `scripts/c6_cost.py`). The mapping from tables to stages, the hardware, the run times and the random seeds are in [docs/reproduce_the_paper.md](docs/reproduce_the_paper.md). The development and test users of every domain are fixed by seeds and can be rebuilt exactly; their identifiers will also be released.
 
 ## Data and licenses
 

@@ -17,7 +17,7 @@ from .store import LEGEND, Context, EvidenceStore
 
 class EvidencePromptBuilder(PromptBuilder):
     def __init__(self, ds, store: EvidenceStore, pool=None, **kw):
-        super().__init__(ds, None, **kw)
+        super().__init__(ds, None, day=store.window / 30.0, **kw)    # the store's window is 30 days in its time unit
         self.store, self.pool = store, pool          # pool: the multi-agent pool, for the "found by" statement
         self.drop: frozenset = frozenset()          # statement families left out (training-time dropout)
         self._last = threading.local()              # the context of the last case, per thread (runs use workers)

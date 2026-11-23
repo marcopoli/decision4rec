@@ -1,0 +1,136 @@
+{
+ "absent": {
+  "vg": {
+   "absent": 0.7915,
+   "list entropy": 0.5257009805926579,
+   "reader entropy": 0.5445387215180477,
+   "list evidence": 0.4819234946849848,
+   "history length": 0.5125024427709886,
+   "list only": 0.5061300296465291,
+   "all": 0.5190990606125333
+  },
+  "mi": {
+   "absent": 0.8625,
+   "list entropy": 0.49063715415019765,
+   "reader entropy": 0.5333185770750988,
+   "list evidence": 0.5068374176548089,
+   "history length": 0.4605185770750988,
+   "list only": 0.5214313570487483,
+   "all": 0.5288453227931489
+  },
+  "steam": {
+   "absent": 0.74,
+   "list entropy": 0.5162149168399168,
+   "reader entropy": 0.514989604989605,
+   "list evidence": 0.48544048856548855,
+   "history length": 0.4835856288981289,
+   "list only": 0.5011941268191268,
+   "all": 0.4992502598752599
+  },
+  "ind": {
+   "absent": 0.8905,
+   "list entropy": 0.5064032058332628,
+   "reader entropy": 0.5492681501080661,
+   "list evidence": 0.5330441314842874,
+   "history length": 0.48701540102400015,
+   "list only": 0.4748345678252688,
+   "all": 0.5082158450821584
+  },
+  "ml1m": {
+   "absent": 0.4885,
+   "list entropy": 0.48354279413809903,
+   "reader entropy": 0.5067310607311267,
+   "list evidence": 0.446044957782667,
+   "history length": 0.3994197930705343,
+   "list only": 0.6388459495072893,
+   "all": 0.6386738584711312
+  },
+  "ml1m_plus": {
+   "absent": 0.4975,
+   "list entropy": 0.45104227605690145,
+   "reader entropy": 0.5005475136878422,
+   "list evidence": 0.45893347333683343,
+   "history length": 0.3953668841721043,
+   "list only": 0.6335338383459587,
+   "all": 0.6305407635190879
+  }
+ },
+ "deep": {
+  "rtm50:kev-0.8b-rtm": {
+   "vg": {
+    "in_50": 511,
+    "deep": 94,
+    "reader_top10": 0.06382978723404255,
+    "fused_top10": 0.02127659574468085,
+    "reader_top30": 0.3723404255319149,
+    "fused_median_rank": 35.0,
+    "reader_median_rank": 33.0
+   },
+   "mi": {
+    "in_50": 327,
+    "deep": 52,
+    "reader_top10": 0.0,
+    "fused_top10": 0.0,
+    "reader_top30": 0.28846153846153844,
+    "fused_median_rank": 37.5,
+    "reader_median_rank": 37.0
+   },
+   "steam": {
+    "in_50": 629,
+    "deep": 109,
+    "reader_top10": 0.01834862385321101,
+    "fused_top10": 0.0,
+    "reader_top30": 0.3577981651376147,
+    "fused_median_rank": 37.0,
+    "reader_median_rank": 33.0
+   },
+   "ind": {
+    "in_50": 264,
+    "deep": 45,
+    "reader_top10": 0.044444444444444446,
+    "fused_top10": 0.022222222222222223,
+    "reader_top30": 0.35555555555555557,
+    "fused_median_rank": 36.0,
+    "reader_median_rank": 35.0
+   }
+  },
+  "rtm50:kev-4b-rtm": {
+   "vg": {
+    "in_50": 511,
+    "deep": 94,
+    "reader_top10": 0.06382978723404255,
+    "fused_top10": 0.02127659574468085,
+    "reader_top30": 0.46808510638297873,
+    "fused_median_rank": 33.0,
+    "reader_median_rank": 31.0
+   },
+   "mi": {
+    "in_50": 327,
+    "deep": 52,
+    "reader_top10": 0.07692307692307693,
+    "fused_top10": 0.057692307692307696,
+    "reader_top30": 0.4230769230769231,
+    "fused_median_rank": 34.0,
+    "reader_median_rank": 33.0
+   },
+   "steam": {
+    "in_50": 629,
+    "deep": 109,
+    "reader_top10": 0.03669724770642202,
+    "fused_top10": 0.009174311926605505,
+    "reader_top30": 0.43119266055045874,
+    "fused_median_rank": 35.0,
+    "reader_median_rank": 34.0
+   },
+   "ind": {
+    "in_50": 264,
+    "deep": 45,
+    "reader_top10": 0.06666666666666667,
+    "fused_top10": 0.044444444444444446,
+    "reader_top30": 0.4888888888888889,
+    "fused_median_rank": 34.0,
+    "reader_median_rank": 31.0
+   }
+  }
+ }
+}

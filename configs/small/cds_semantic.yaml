@@ -1,0 +1,14 @@
+# V24 source domain (docs/16_v24_datasets.md): only what the pool needs, SASRec and SASRecF chosen on validation users
+name: cds_semantic
+dataset: data/processed/cds_vinyl
+out: runs/small/cds
+retriever: {kind: itemknn}     # A9 (2026-11-13): training-free; these cases only score the baselines
+eval: {track: B, K: 50, n_test: 1000, n_valid: 300, seed: 13, pool: 200, hist_len: 10}
+item_text:
+  embedder: {kind: hf, model: BAAI/bge-small-en-v1.5, pooling: cls, query_prefix: 'Represent this sentence for searching relevant passages: '}
+  cache: runs/small/cds/retrieval
+benchmark:
+  baselines: [sasrec, sasrecf]
+reference: retriever
+arms:
+- {name: retriever, method: retriever}

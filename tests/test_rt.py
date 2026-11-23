@@ -330,3 +330,35 @@ def test_reserved_users_are_never_drawn(workspace, tmp_path):
                      eval={"track": "B", "K": 12, "n_test": 20, "n_valid": 5, "seed": 3, "pool": 80, "users": "reserved"})
     drawn = {c.user for s in get_cases(load_config(conf), ds).values() for c in s}
     assert drawn and drawn <= res
+
+
+def test_other_sequence_models_join_the_pool_on_the_same_ranker_users(workspace, tmp_path):
+    pytest.importorskip("torch")
+    from decision4rec.agents.pool import pool_for
+    from decision4rec.data.schema import Dataset
+    from decision4rec.experiments.benchmark import run_baselines
+    from decision4rec.experiments.runner import load_config
+
+    out = str(tmp_path / "runs")
+    bench = {"baselines": ["sasrec", "gru4rec"], "grids": {"sasrec": [FAST], "gru4rec": [{"d": 16, "lr": 1e-3, "dropout": 0.1, "epochs": 2}]}}
+    ref = workspace("xs_ref", K=15, out=out, benchmark=bench)
+    run_baselines(ref, device="cpu")
+    arms = [{"name": "retriever", "method": "retriever"}]
+
+    def pool(name, **more):
+        path = workspace(name, K=12, out=out, retriever={"kind": "pool", "tag": name}, arms=arms, benchmark=bench, evidence={"frac": 1.0},
+                         pool={"ref": ref, "model": "sasrec", "users": 60, "seed": 1, "depth": 8, "seq_depth": 15, **more},
+                         item_text={"embedder": {"kind": "hashing"}, "cache": str(tmp_path / "emb")})
+        cfg = load_config(path)
+        return pool_for(cfg, Dataset.load(cfg["dataset"]))
+
+    one = pool("xs_one")
+    two = pool("xs_two", extra=["gru4rec"], users_of="pool_sasrec_u60_s1")
+    assert two.train_users == one.train_users
+    assert "gru4rec" in two.agents and len(two.mu) == len(one.mu) + 3     # membership, closeness, z-score
+    u = one.train_users[0]
+    h = [int(x[0]) for x in two.ds.seqs[u][:-2]]
+    items, scores = two.rank(u, h, 60)
+    assert np.all(np.diff(scores) <= 1e-9)
+    found = [two.found_by(u, len(h), j) for j in items]        # every candidate of the pool, whatever its place
+    assert any("third sequence model #" in f for f in found)

@@ -66,6 +66,7 @@ folder() {
   case "$1" in
     ml1m) echo ml1m ;; vg) echo video_games ;; mi) echo musical_instruments ;; ind) echo industrial_scientific ;;
     ml20m) echo ml20m ;; movies) echo movies_tv ;; books) echo books ;; steam) echo steam ;;
+    cds) echo cds_vinyl ;; toys) echo toys_games ;; sw) echo software ;;   # V24 source domains (docs/16)
   esac
 }
 
@@ -95,6 +96,9 @@ prepare() {
            run $J prepare --dataset mlcsv --folder "$RAW/ml-20m" --name ml20m --out data/processed/ml20m ${MAX_USERS:+--max-users $MAX_USERS} ;;
     movies) amazon movies Movies_and_TV ;;
     books)  amazon books Books ;;
+    cds)    amazon cds CDs_and_Vinyl ;;
+    toys)   amazon toys Toys_and_Games ;;
+    sw)     amazon sw Software ;;
     steam) fetch https://cseweb.ucsd.edu/~wckang/steam_reviews.json.gz https://cseweb.ucsd.edu/~wckang/steam_games.json.gz
            run $J prepare --dataset steam --reviews "$RAW/steam_reviews.json.gz" --meta "$RAW/steam_games.json.gz" \
                --out data/processed/steam ${MAX_USERS:+--max-users $MAX_USERS} ;;
@@ -357,7 +361,8 @@ RTV="${RTV:-rt}"
 RT_DOMAINS="${RT_DOMAINS:-vg mi steam}"
 RT_MODEL="${RT_MODEL:-$RTV}"
 if [ "$RT_MODEL" = rt ]; then RT_DIR="runs/$setting/rectune_choices"; else RT_DIR="runs/$setting/rectune_choices_$RT_MODEL"; fi
-case "$RTV" in rt) RT_STATE=640 ;; rte) RT_STATE=1536 ;; rtmc) RT_STATE=3200 ;; *) RT_STATE=1792 ;; esac   # longer rows: statements, "found by"; rtmc: 250 characters per item, rows up to ~3.7k tokens (row limit = RT_STATE + 640)
+case "$RTV" in rt) RT_STATE=640 ;; rte) RT_STATE=1536 ;; rtmc) RT_STATE=3200 ;; rtmc512) RT_STATE=6400 ;; *) RT_STATE=1792 ;; esac   # longer rows: statements, "found by"; rtmc: 250 characters per item, rows up to ~3.7k tokens; rtmc512: 512 characters, rows up to ~7k (row limit = RT_STATE + 640)
+RT_STATE="${RT_MAX_STATE:-$RT_STATE}"   # V20c: pool2 rows need 2304 to keep every record (logs/probe/v20c_lengths.log)
 rt_only_small() { [ "$setting" = small ] || { say "Decision4Rec-T exists only in the small setting"; return 1; }; }
 
 stage_rt_export() {   # training records: real choices over the SASRecF top 30, 15,000 users per domain
@@ -407,7 +412,7 @@ rt_train() {   # size (0.8b or 4b), base model, base revision (as in the Kev REA
   # overflow a row (what made the old rectune stage fail). --max_state raises the row limit to 1024 + max_state - 384
   # tokens (1,280 for rt, 2,176 for rte); longer records are dropped by the trainer, which prints how many.
   in_kev uv run python $trainer --data "$ROOT/$RT_DIR/train.jsonl" --base "$base" --base_revision "$rev" \
-    --init_from "${RT_INIT:-jaredpalmer/kev-$size}" --epochs 1 --lr "$lr" --batch "$batch" --accum "$accum" --length_sort 1 --dtype bf16 --weights_dtype "$wdt" \
+    --init_from "${RT_INIT:-jaredpalmer/kev-$size}" --epochs "${RT_EPOCHS:-1}" --lr "$lr" --batch "$batch" --accum "$accum" --length_sort 1 --dtype bf16 --weights_dtype "$wdt" \
     --checkpointing 1 --max_state "$RT_STATE" --p_none 0 --p_none_distract 0 --p_distract 0 --device "$DEVICE" \
     --max_steps "$steps" --seed "${RT_SEED:-0}" --out "runs/kev-$size-$RT_MODEL"
   # No kev.benchmark on the held-out records: it encodes within the training default of 1,024 tokens per row and
@@ -541,6 +546,7 @@ ev_train() {   # size, base model, base revision, learning rate, weights dtype, 
 
 stage_ev_train_08() { ev_train 0.8b Qwen/Qwen3.5-0.8B-Base dc7cdfe2ee4154fa7e30f5b51ca41bfa40174e68 1e-4 fp32 8 1; }
 stage_ev_train_4() { ev_train 4b Qwen/Qwen3.5-4B-Base 1001bb4d826a52d1f399e183466143f4da7b741b 5e-5 bf16 2 4; }
+stage_ev_train_9() { ev_train 9b Qwen/Qwen3.5-9B-Base 68c46c4b3498877f3ef123c856ecfde50c39f404 5e-5 bf16 "${EV_BATCH_9:-1}" "${EV_ACCUM_9:-8}"; }   # 2026-10-24: 9B on the 3090 (1 x 8 fits, 2.25 s per record)
 
 ev_eval() {   # size: Kev-Rec-E and the released Kev-4B (same statements, no training) on every pilot config
   local size="$1" p d k runs=""
