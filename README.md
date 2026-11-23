@@ -171,19 +171,22 @@ decision4rec/
 
 ## Trained models
 
-The trained decision models are adapters on the Qwen3.5 base models, trained from the released Kev models on real choices of three domains (Video Games, Musical Instruments, Steam). They are published on Hugging Face:
+The trained decision models are adapters on Qwen base models (Qwen3.5 and Qwen3.8), trained from the released Kev models on real choices of three domains (Video Games, Musical Instruments, Steam). They are published on Hugging Face:
 
-| Model | Base | Variant |
-|---|---|---|
-| `m-polignano/decision4rec-kev-0.8b` | Qwen/Qwen3.5-0.8B-Base | Decision4Rec-Full |
-| `m-polignano/decision4rec-kev-4b` | Qwen/Qwen3.5-4B-Base | Decision4Rec-Full |
-| `m-polignano/decision4rec-kev-9b` | Qwen/Qwen3.5-9B-Base | Decision4Rec-Full (8,000 records) |
-| `m-polignano/decision4rec-kev-27b` | Qwen/Qwen3.8-27B | Decision4Rec-Full (8,000 records) |
+| Model | Base | Records | Role in the paper |
+|---|---|---|---|
+| [`m-polignano/decision4rec-kev-9b-all`](https://huggingface.co/m-polignano/decision4rec-kev-9b-all) | Qwen/Qwen3.5-9B-Base | all 34,667 | main reader of version 2 (seed 0) |
+| [`m-polignano/decision4rec-kev-9b-all-seed1`](https://huggingface.co/m-polignano/decision4rec-kev-9b-all-seed1) | Qwen/Qwen3.5-9B-Base | all 34,667 | seed 1 (law of evidence, mean of 3 seeds) |
+| [`m-polignano/decision4rec-kev-9b-all-seed2`](https://huggingface.co/m-polignano/decision4rec-kev-9b-all-seed2) | Qwen/Qwen3.5-9B-Base | all 34,667 | seed 2 (law of evidence, mean of 3 seeds) |
+| [`m-polignano/decision4rec-kev-0.8b`](https://huggingface.co/m-polignano/decision4rec-kev-0.8b) | Qwen/Qwen3.5-0.8B-Base | all 34,667 | size table, law of evidence |
+| [`m-polignano/decision4rec-kev-4b`](https://huggingface.co/m-polignano/decision4rec-kev-4b) | Qwen/Qwen3.5-4B-Base | all 34,667 | size table, law of evidence |
+| [`m-polignano/decision4rec-kev-9b`](https://huggingface.co/m-polignano/decision4rec-kev-9b) | Qwen/Qwen3.5-9B-Base | same 8,000 | size table (data-matched) |
+| [`m-polignano/decision4rec-kev-27b`](https://huggingface.co/m-polignano/decision4rec-kev-27b) | Qwen/Qwen3.8-27B | same 8,000 | size table (data-matched) |
 
 Serve one as any Kev checkpoint:
 
 ```bash
-uv run --extra serve python -m kev.serve --run m-polignano/decision4rec-kev-4b --port 8009
+uv run --extra serve python -m kev.serve --run m-polignano/decision4rec-kev-9b-all --port 8009
 ```
 
 ## Reproducing the paper
