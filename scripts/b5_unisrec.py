@@ -17,6 +17,10 @@ replaces RecBole's loaders so that training targets, model selection and ranking
         needs torch, recbole and the UniSRec code (UNISREC_DIR) and weights (UNISREC_WEIGHTS); writes model.pt,
         info.json, test_ranks.json
   python scripts/b5_unisrec.py selfcheck                batch builder and rank rule against naive versions
+  python scripts/b5_unisrec.py export_cases <c> <cfg> <out.npz>   on .34: histories and targets of the test cases of another
+        config (for example the reserved users, configs/small/<c>_r1rtm.yaml) in the layout of data.npz
+  python scripts/b5_unisrec.py fit <dir> <out> --score-npz <cases.npz> --model-dir <dir of model.pt> [--stage ...] [--scratch]
+        no training: ranks the cases of cases.npz with a trained model.pt and writes test_ranks.json to <out>
 """
 import argparse
 import hashlib
@@ -123,6 +127,18 @@ def export(c):
     print(f"{c}: feat1CLS {feats.shape} from {BERT} in {time.time() - t0:.0f} s", flush=True)
 
 
+def export_cases(c, cfg_path, out_npz):
+    """The histories and targets of the test cases of another config (for example the reserved users of <c>_r1rtm) in the
+    layout of data.npz, so that a trained model can rank them (fit --score-npz)."""
+    from decision4rec.data.schema import load_cases
+    from decision4rec.experiments.runner import case_paths, load_config
+    cases = load_cases(case_paths(load_config(cfg_path))["test"])
+    sf, so = flat([q.history for q in cases])
+    np.savez(out_npz, test_flat=sf, test_off=so, test_tgt=np.array([q.target for q in cases], dtype=np.int64),
+             test_cid=np.array([q.cid for q in cases]))
+    print(json.dumps({"scenario": c, "cases": len(cases), "file": out_npz}), flush=True)
+
+
 # ---- fit (anywhere with torch + recbole + UniSRec code) --------------------------
 
 def fit(a):
@@ -207,6 +223,15 @@ def fit(a):
         return np.concatenate(out).astype(float)
 
     os.makedirs(a.out, exist_ok=True)
+    if a.score_npz:     # ranking only: a model trained earlier, other test cases (the training users are unchanged)
+        C = np.load(a.score_npz)
+        model.load_state_dict(torch.load(os.path.join(a.model_dir, "model.pt"), map_location=dev, weights_only=True))
+        r = evaluate(C["test_flat"], C["test_off"], C["test_tgt"])
+        json.dump({str(int(c)): float(x) for c, x in zip(C["test_cid"], r)}, open(os.path.join(a.out, "test_ranks.json"), "w"))
+        json.dump({"scored_cases": a.score_npz, "model_dir": a.model_dir, "test_cases": len(r), "test_ndcg10": ndcg10(r),
+                   "model_md5_file": os.path.join(a.model_dir, "MD5")}, open(os.path.join(a.out, "info.json"), "w"), indent=1)
+        print(f"scored {len(r)} cases; NDCG@10 {ndcg10(r):.4f}", flush=True)
+        return
     best, best_ep, bad, t0 = -1.0, 0, 0, time.time()
     for ep in range(1, (2 if a.smoke else cfg["epochs"]) + 1):
         model.train()
@@ -271,15 +296,19 @@ def selfcheck():
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("cmd", choices=["export", "fit", "selfcheck"])
+    p.add_argument("cmd", choices=["export", "export_cases", "fit", "selfcheck"])
     p.add_argument("args", nargs="*")
     p.add_argument("--stage", default="transductive_ft", choices=["transductive_ft", "inductive_ft"])
     p.add_argument("--scratch", action="store_true")
     p.add_argument("--smoke", action="store_true")
+    p.add_argument("--score-npz", dest="score_npz", default=None)
+    p.add_argument("--model-dir", dest="model_dir", default=None)
     a = p.parse_args()
     if a.cmd == "export":
         for c in a.args:
             export(c)
+    elif a.cmd == "export_cases":
+        export_cases(*a.args)
     elif a.cmd == "fit":
         a.dir, a.out = a.args
         fit(a)

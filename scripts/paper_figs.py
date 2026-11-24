@@ -1,8 +1,8 @@
 """D1: write the pgfplots figures of paper V2 from the result JSON files. No number is typed by hand.
 
 Usage: python scripts/paper_figs.py [--json results/paper_json/logs] [--out docs/paper_v2/figs]
-fig_law: L1, the information added by the reader against log10(1 + earlier purchases of the target), six evidence bins
-         per setting, 9B reader (mean of three seeds), development users (v40_law.json).
+fig_law: L1, the information added by the decision model against log10(1 + earlier purchases of the target), six evidence bins
+         per setting, 9B decision model (mean of three seeds), development users (v40_law.json).
 fig_forecast: L2, frozen forecast with its 80% interval against the observed gain, nine unseen scenarios (l2b_score.json).
 The L4 stream is shown as a table only: its weekly series have very different lengths (Steam has two weeks).
 """

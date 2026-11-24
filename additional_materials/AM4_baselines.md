@@ -26,3 +26,18 @@ Whole catalogue, best configuration of the full grid, all users of each domain (
 | SASRec | 0.0551 | 0.0338 | 0.0672 | 0.0262 | 0.1850 | 0.1850 |
 | BERT4Rec | 0.0500 | 0.0298 | 0.0604 | 0.0200 | 0.1623 | 0.1623 |
 | SASRecF | **0.0585** | **0.0365** | **0.0680** | **0.0296** | **0.1870** | 0.1828 |
+
+## UniSRec on the development users (pre-registered comparison)
+
+The comparison of Decision4Rec-Full with UniSRec was pre-registered (`docs/r1/b5_prereg.md` of the working repository) on the 2,000 development test users for the six development settings. The paper reports the four domains on the 10,000 reserved users instead (rows added after the plan); the pre-registered rows are here. NDCG@10, UniSRec fine-tuned on the scenario (transductive), Holm-corrected `**` p < 0.01.
+
+| Scenario | Users | SASRecF | UniSRec | Decision4Rec-Full | Full vs UniSRec |
+|---|---|---|---|---|---|
+| Video Games | 2,000 | 0.0622 | 0.0629 | 0.0791 | +25.8% ** |
+| Musical Instruments | 2,000 | 0.0370 | 0.0386 | 0.0504 | +30.6% ** |
+| Steam | 2,000 | 0.0759 | 0.0676 | 0.0851 | +25.9% ** |
+| Industrial and Scientific | 2,000 | 0.0310 | 0.0326 | 0.0416 | +27.7% ** |
+| ML-1M | 2,000 | 0.1806 | 0.1440 | 0.1923 | +33.6% ** |
+| ML-1M enriched | 2,000 | 0.1812 | 0.1368 | 0.1984 | +45.0% ** |
+
+The same four domains on the 10,000 reserved users (`scripts/b5_score_reserved.py`, UniSRec models unchanged, ranking only): Full is above UniSRec by +26.5%, +20.7%, +30.6% and +14.7% (Holm p = 0.0004 over the four domains).

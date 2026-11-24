@@ -33,7 +33,7 @@ def cell(c):
 def t_confirm(root, out):
     """Table 1: confirmation on reserved users, three Holm families (F1 leave-last-out, F2 cold, F3 unseen)."""
     rows = []
-    label = {"f1": "F1, reserved users", "f2": "F2, cold items", "f3": "F3, unseen scenarios"}
+    label = {"f1": "F1, reserved users", "f2": "F2, after a time cut", "f3": "F3, unseen scenarios"}
     for f in ("r1_f1", "r1_f2", "r1_f3"):
         d = load(root, f)
         rows.append(f"\\addlinespace\n\\multicolumn{{7}}{{@{{}}l}}{{\\emph{{{label[d['family']]}}}}} \\\\")
@@ -48,7 +48,7 @@ Scenario & Users & Reference & \multicolumn{1}{c}{Ref.\ NDCG@10\hb{}} & \multico
 
 
 def t_law_fresh(root, out):
-    """L1 on reserved users (F4): reader gain in nats and its slope per tenfold of target purchases."""
+    """L1 on reserved users (F4): decision model gain in nats and its slope per tenfold of target purchases."""
     d = load(root, "r1_f4")
     rows = [f"{NAME[k]} & {v['n']:,} & {v['gain']:.3f} & ${v['slope']:+.3f}{mark(v['holm'])}$ & {v['holm']:.4f} \\\\"
             for k, v in d["domains"].items()]
@@ -69,7 +69,7 @@ def write(out, name, src, tex):
 
 
 def t_accounting(root, out):
-    """A2: where the target is (outside the pool, in the pool below 30, in the 30) and how much headroom the reader closes."""
+    """A2: where the target is (outside the pool, in the pool below 30, in the 30) and how much headroom the decision model closes."""
     d = load(root, "v39_accounting")
     rows = []
     for k in DOM6:
@@ -80,14 +80,14 @@ def t_accounting(root, out):
 \toprule
  & \multicolumn{3}{c}{Target of the user (\% of users)} & \multicolumn{3}{c}{NDCG@10\hb{}} & Headroom \\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}
-Scenario & outside pool & pool, not top 30 & top 30 & \listsys{} & \fullsys{} & perfect reader & closed (\%)\hb{} \\
+Scenario & outside pool & pool, not top 30 & top 30 & \listsys{} & \fullsys{} & perfect decision model & closed (\%)\hb{} \\
 \midrule
 """ + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
     write(out, "t_accounting", "v39_accounting.json", tex)
 
 
 def t_size_nats(root, out):
-    """V26: information the reader adds to the list (nats per choice), by size. One record set per block."""
+    """V26: information the decision model adds to the list (nats per choice), by size. One record set per block."""
     n = load(root, "v26_nats")["nats"]
     def row(tag, label):
         m = n[tag]
@@ -135,35 +135,52 @@ NAME.update({"baby": "Baby Products", "pet": "Pet Supplies", "groc": "Grocery", 
 
 
 def t_baselines(root, out):
-    """B5: Decision4Rec-Full against UniSRec (fine-tuned, from scratch, inductive) and SASRecF, 15 settings."""
-    fams = [("Development and unseen scenarios", "b5_transductive", "b5_transductive_ft_scratch", "b5_inductive_ft"),
-            ("Fresh scenarios", "b5_fresh", "b5_fresh_transductive_ft_scratch", "b5_fresh_inductive_ft")]
+    """B5: Decision4Rec-Full against UniSRec. Main table: reserved users of the four domains (added after the plan),
+    MovieLens-1M on development users (too few users for a reserved sample), nine unseen and fresh scenarios. Control table:
+    the three UniSRec variants, only where they were run (the nine unseen and fresh scenarios, by plan)."""
+    R = load(root, "b5_reserved")["domains"]
+    T, S, I = (load(root, x)["settings"] for x in ("b5_transductive", "b5_transductive_ft_scratch", "b5_inductive_ft"))
+    FT, FS, FI = (load(root, x)["settings"] for x in ("b5_fresh", "b5_fresh_transductive_ft_scratch", "b5_fresh_inductive_ft"))
     body = []
-    for title, ft, sc, ind in fams:
-        F, S, I = (load(root, x)["settings"] for x in (ft, sc, ind))
-        body.append(f"\\addlinespace\n\\multicolumn{{8}}{{@{{}}l}}{{\\emph{{{title}}}}} \\\\")
-        for k, v in F.items():
-            variants = {"ft": v}
-            if k in S: variants["sc"] = S[k]
-            if k in I: variants["in"] = I[k]
-            best = max(variants.values(), key=lambda x: x["unisrec"])
-            def u(key):
-                return f"{variants[key]['unisrec']:.4f}" if key in variants else "--"
-            body.append(f"{NAME[k]} & {v['users']:,} & {v['sasrecf']:.4f} & {u('ft')} & {u('sc')} & {u('in')} & "
-                        f"{v['full']:.4f} & {cell(best['full_vs_unisrec'])} \\\\")
-    tex = r"""\begin{tabular}{@{}lrrrrrrr@{}}
-\toprule
- & & & \multicolumn{3}{c}{UniSRec NDCG@10\hb{}} & & \fullsys{} vs \\
-\cmidrule(lr){4-6}
-Scenario & Users & SASRecF\hb{} & fine-tuned & scratch & inductive & \fullsys{}\hb{} & best UniSRec\hb{} \\
-\midrule
-""" + "\n".join(body).replace("\\addlinespace\n", "", 1) + "\n\\bottomrule\n\\end{tabular}\n"
-    write(out, "t_baselines", "b5_*.json", tex)
 
+    def row(label, users, sasrecf, uni, full, c):
+        body.append(f"{label} & {users:,} & {sasrecf:.4f} & {uni:.4f} & {full:.4f} & {cell(c)} \\\\")
+    body.append("\\multicolumn{6}{@{}l}{\\emph{Reserved users}} \\\\")
+    for k in ("vg", "mi", "steam", "ind"):
+        v = R[k]
+        row(NAME[k], v["users"], v["sasrecf"], v["unisrec"], v["full"], v["full_vs_unisrec"])
+    body.append("\\addlinespace\n\\multicolumn{6}{@{}l}{\\emph{MovieLens-1M, development users}} \\\\")
+    for k in ("ml1m", "ml1m_plus"):
+        v = T[k]
+        row(NAME[k], v["users"], v["sasrecf"], v["unisrec"], v["full"], v["full_vs_unisrec"])
+    body.append("\\addlinespace\n\\multicolumn{6}{@{}l}{\\emph{Unseen and fresh scenarios}} \\\\")
+    ctrl = []
+    for ft, sc, ind, keys in ((T, S, I, ("cds", "toys", "sw")), (FT, FS, FI, None)):
+        for k in (keys or ft.keys()):
+            v = ft[k]
+            variants = [v] + [x[k] for x in (sc, ind) if k in x]
+            best = max(variants, key=lambda x: x["unisrec"])
+            row(NAME[k], v["users"], v["sasrecf"], best["unisrec"], v["full"], best["full_vs_unisrec"])
+            ctrl.append(f"{NAME[k]} & {v['users']:,} & {v['sasrecf']:.4f} & {v['unisrec']:.4f} & "
+                        f"{sc[k]['unisrec']:.4f} & {ind[k]['unisrec']:.4f} \\\\")
+    tex = r"""\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Scenario & Users & SASRecF\hb{} & UniSRec\hb{} & \fullsys{}\hb{} & \fullsys{} vs UniSRec\hb{} \\
+\midrule
+""" + "\n".join(body) + "\n\\bottomrule\n\\end{tabular}\n"
+    write(out, "t_baselines", "b5_reserved.json, b5_*.json", tex)
+    tex = r"""\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+ & & & \multicolumn{3}{c}{UniSRec NDCG@10\hb{}} \\
+\cmidrule(lr){4-6}
+Scenario & Users & SASRecF\hb{} & fine-tuned & scratch & inductive \\
+\midrule
+""" + "\n".join(ctrl) + "\n\\bottomrule\n\\end{tabular}\n"
+    write(out, "t_baselines_controls", "b5_*.json", tex)
 
 
 def t_forecast(root, out):
-    """L2 fair test: frozen forecast (M4) of the reader gain in nats against the observed gain, nine unseen scenarios."""
+    """L2 fair test: frozen forecast (M4) of the decision model gain in nats against the observed gain, nine unseen scenarios."""
     d = load(root, "l2b_score")
     rows = []
     for k, v in d["scenarios"].items():
@@ -230,7 +247,7 @@ Scenario & Users & rare & middle & popular & rare $-$ popular & rare & popular &
 
 
 def t_nulls(root, out):
-    """Null ladder: levers that did not move the reader. One row per lever, its own metric, four sparse scenarios
+    """Null ladder: levers that did not move the decision model. One row per lever, its own metric, four sparse scenarios
     (VG, MI, Steam, IND): range of the effect and how many of the four have p < .05 (paired, uncorrected unless said)."""
     D4 = ["vg", "mi", "steam", "ind"]
     rows = []
@@ -241,7 +258,7 @@ def t_nulls(root, out):
         d = load(root, f)[tag]
         ch = [d[k]["vs_ref"]["rel"] for k in D4 if k in d]; sg = sum(d[k]["vs_ref"]["p"] < 0.05 for k in D4 if k in d)
         rows.append(f"{label} & {what} & {rng(ch)}\\% & {sg} of {len(ch)} \\\\")
-    rows.append("\\addlinespace\n\\multicolumn{4}{@{}l}{\\emph{The reader and its training}} \\\\")
+    rows.append("\\addlinespace\n\\multicolumn{4}{@{}l}{\\emph{The decision model and its training}} \\\\")
     vs_ref("Two epochs instead of one (9B)", "nulls", "rtm:kev-9b-rtm_e2", "fused vs one epoch")
     vs_ref("Twice the records (9B)", "nulls", "rtm:kev-9b-rtmv24", "fused vs plain 9B")
     vs_ref("More domains, same size (9B)", "nulls", "rtm:kev-9b-rtmv24d", "fused vs plain 9B")
@@ -250,9 +267,9 @@ def t_nulls(root, out):
     vs_ref("Second look at the top 10 (9B)", "nulls", "rtmt:kev-9b-rtm", "fused vs one look")
     vs_ref("Fifty options, no retraining (0.8B)", "nulls_fifty", "rtm50:kev-0.8b-rtm", "fused vs 30 options")
     vs_ref("Fifty options, no retraining (4B)", "nulls_fifty", "rtm50:kev-4b-rtm", "fused vs 30 options")
-    rows.append("\\addlinespace\n\\multicolumn{4}{@{}l}{\\emph{What the reader and the ranker see}} \\\\")
-    vs_ref("Richer pool, reader retrained (9B)", "nulls", "rtm2:kev-9b-rtm2", "fused vs plain pool")
-    vs_ref("Ratings and time marks for the reader (0.8B)", "nulls", "rtmx:kev-0.8b-rtmx", "fused vs plain records")
+    rows.append("\\addlinespace\n\\multicolumn{4}{@{}l}{\\emph{What the decision model and the ranker see}} \\\\")
+    vs_ref("Richer pool, decision model retrained (9B)", "nulls", "rtm2:kev-9b-rtm2", "fused vs plain pool")
+    vs_ref("Ratings and time marks for the decision model (0.8B)", "nulls", "rtmx:kev-0.8b-rtmx", "fused vs plain records")
     ch, sg = [], 0
     for k in D4:
         t = load(root, f"v28a_{k}")["test"]; ch.append(100 * (t["all"]["ndcg"] / t["base"] - 1)); sg += t["all"]["p"] < 0.05
@@ -260,10 +277,10 @@ def t_nulls(root, out):
     rows.append("\\addlinespace\n\\multicolumn{4}{@{}l}{\\emph{Who to read and what is missing}} \\\\")
     c = load(root, "v25_thin")["cascade"]
     kept = [100 * c[k][g][2] for k in D4 for g in c[k] if g != "gain"]
-    rows.append(f"Read only 30\\% of users, chosen by a simple rule & share of the reader's gain kept & {rng(kept, '{:+.0f}')}\\% & -- \\\\")
+    rows.append(f"Read only 30\\% of users, chosen by a simple rule & share of the decision model's gain kept & {rng(kept, '{:+.0f}')}\\% & -- \\\\")
     a = load(root, "v29_absent")["absent"]
     auc = [a[k][m] for k in D4 for m in ("list entropy", "reader entropy")]
-    rows.append(f"Tell that the target is not among the 30 & AUC of list and reader entropy & {rng(auc, '{:.2f}')} & -- \\\\")
+    rows.append(f"Tell that the target is not among the 30 & AUC of list and decision model entropy & {rng(auc, '{:.2f}')} & -- \\\\")
     rows.append("\\addlinespace\n\\multicolumn{4}{@{}l}{\\emph{Ladders from the law (K1 to K3)}} \\\\")
     # Slots and rare agents change which items enter the 30; the stored ndcg10 field is the refit list without the
     # slots, so the table reports hits in the 30 (rare targets and all targets), the quantity the ladder was built for.
@@ -312,7 +329,7 @@ Scenario & List & Full & List & Full & $p$ & List & Full & $p$ & List & Full & $
 
 
 def t_law_dev(root, out):
-    """L1 on development users: slope of the reader gain (nats) per tenfold of target purchases, by reader family."""
+    """L1 on development users: slope of the decision model gain (nats) per tenfold of target purchases, by decision model family."""
     L = load(root, "v40_law")["law"]; P = load(root, "v40_law_llm")["law"]
     readers = [("Kev-0.8B, trained", L, "rtm:kev-0.8b-rtm"), ("Kev-4B, trained", L, "rtm:kev-4b-rtm"),
                ("Kev-9B, trained (mean of 3 seeds)", L, "9b-mean"), ("Kev-27B, trained", L, "rtm:kev-27b-rtm"),
@@ -326,7 +343,7 @@ def t_law_dev(root, out):
         rows.append(f"{lab} & " + " & ".join(cells) + f" & ${a['slope']:+.3f}$ & {a['p']:.4f} \\\\")
     tex = r"""\begin{tabular}{@{}lrrrrrrrr@{}}
 \toprule
-Reader & """ + " & ".join(NAME[k] for k in DOM6) + r""" & Pooled & $p$\lb{} \\
+Decision model & """ + " & ".join(NAME[k] for k in DOM6) + r""" & Pooled & $p$\lb{} \\
 \midrule
 """ + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
     write(out, "t_law_dev", "v40_law.json, v40_law_llm.json", tex)
