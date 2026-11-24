@@ -156,6 +156,7 @@ decision4rec/
 │   └── operators/     Luce model, block designs, ranking, risk control
 ├── configs/           one YAML file per experiment (small/, large/, backends/)
 ├── scripts/           setting.sh (all stages), env.sh, analysis and probe scripts
+├── splits/            the users scored by every table (development, reserved, unseen scenarios) with SHA-256 digests
 ├── tests/             pytest suite
 └── docs/              guides
 ```

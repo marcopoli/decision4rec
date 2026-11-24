@@ -74,4 +74,4 @@ without correction; the fusion weight is chosen on validation users only.
 | Data-curve subsets | `scripts/subset_records.py ... 2026 --anchor 8000` |
 
 Users reserved for a confirmatory test on fresh users are left out of every sampler
-(`decision4rec/data/reserved.py`); their identifiers are not part of this repository.
+(`decision4rec/data/reserved.py`). The lists of the development, reserved and unseen-scenario users of every table are in `splits/`, with their SHA-256 digests; `python scripts/check_splits.py` checks them.

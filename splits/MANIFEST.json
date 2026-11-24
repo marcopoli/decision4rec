@@ -1,0 +1,186 @@
+{
+ "development_vg.json": {
+  "dataset": "video_games",
+  "seqs_sha256": "39ea40925d0a8e20b40a108e0182243517d6b97a5384c682c0648630fe4885e5",
+  "n_test": 2000,
+  "n_valid": 1000,
+  "test_sha256": "23c488f884a04c4a9eea0348fd9fbfb50de3f75affdffb53f244aa6bb7d37c74",
+  "valid_sha256": "b18924857deaaff109be9035241ac381398927a6074b341a4c7d3d3b910f9626"
+ },
+ "development_mi.json": {
+  "dataset": "musical_instruments",
+  "seqs_sha256": "6fefcae4a4fda5b50e75b32aedba8ec28b23b3faf5ada0d63d927690f459fa91",
+  "n_test": 2000,
+  "n_valid": 1000,
+  "test_sha256": "457dc031b20ee29d6da68dcf929d0c5a218b3bda773e6211315e8318cec46174",
+  "valid_sha256": "42433d79fb2cc457d96e39e8b61e0368bfe07ee0afff33835af7645d4779230f"
+ },
+ "development_steam.json": {
+  "dataset": "steam",
+  "seqs_sha256": "abd7bdc3951e000969afdf07981d566676223b6a530033a83e4c6e37fbebb3d8",
+  "n_test": 2000,
+  "n_valid": 1000,
+  "test_sha256": "84006d76d1947c6b7558cca3096e46c0a765a453d5fa3e8f2eb44056a6d7a6aa",
+  "valid_sha256": "e34d6dab757174d19d2877aaf574b4c5f083152c8b74855cf85ee908e6569958"
+ },
+ "development_ind.json": {
+  "dataset": "industrial_scientific",
+  "seqs_sha256": "cf4365c752928471e3ffa681fb73dd7e4b93441bab6bafe7c5ea464d0a714cfa",
+  "n_test": 2000,
+  "n_valid": 1000,
+  "test_sha256": "65297cf63801ed073d81819a908eb088b071ff09020687f31aaeb73827b10f16",
+  "valid_sha256": "80838e9bf6e6abe44db613539fe62671a0c5f830166145802aac093a646ea5ac"
+ },
+ "development_ml1m.json": {
+  "dataset": "ml1m",
+  "seqs_sha256": "1f8eaf7bf8be95a9f257863320cb4e8e64beaa12b0b65a94b074c4356cba1d1b",
+  "n_test": 2000,
+  "n_valid": 1000,
+  "test_sha256": "9d9fe3d7a0581b6f75f5fe326619706b095d40f534856c0f991bba36658bac24",
+  "valid_sha256": "2a7d7e5d3b44141f9a137622bb1620c904d59ae636fac6c6b6bb838db73fb42e"
+ },
+ "development_ml1m_plus.json": {
+  "dataset": "ml1m_plus",
+  "seqs_sha256": "1f8eaf7bf8be95a9f257863320cb4e8e64beaa12b0b65a94b074c4356cba1d1b",
+  "n_test": 2000,
+  "n_valid": 1000,
+  "test_sha256": "9d9fe3d7a0581b6f75f5fe326619706b095d40f534856c0f991bba36658bac24",
+  "valid_sha256": "2a7d7e5d3b44141f9a137622bb1620c904d59ae636fac6c6b6bb838db73fb42e"
+ },
+ "reserved_vg.json": {
+  "dataset": "video_games",
+  "seqs_sha256": "39ea40925d0a8e20b40a108e0182243517d6b97a5384c682c0648630fe4885e5",
+  "n_test": 10000,
+  "n_valid": 1000,
+  "test_sha256": "68a88fa4a56f4be96651fc2222f8823e9a27b2e45614ce24d7ca3b15a438da3f",
+  "valid_sha256": "a56d1a3104d26a58f0872100c048e04c7b917dd2aa4190c7a8a790fee895ee33"
+ },
+ "reserved_mi.json": {
+  "dataset": "musical_instruments",
+  "seqs_sha256": "6fefcae4a4fda5b50e75b32aedba8ec28b23b3faf5ada0d63d927690f459fa91",
+  "n_test": 10000,
+  "n_valid": 1000,
+  "test_sha256": "4f4eda4aa61a16baa665258f8b51129e5df79df0f3a93ddf6313a5061d79b948",
+  "valid_sha256": "d63aa1ba5e0ad74a3b68784ea2989087901a885ee90f5752df8a2d7aa1cf63a3"
+ },
+ "reserved_steam.json": {
+  "dataset": "steam",
+  "seqs_sha256": "abd7bdc3951e000969afdf07981d566676223b6a530033a83e4c6e37fbebb3d8",
+  "n_test": 10000,
+  "n_valid": 1000,
+  "test_sha256": "eacb05fcd1e77565ca2dc90f4d3823a610abbbceb59a660fcaf4737ec7130265",
+  "valid_sha256": "4ee4da7d6ed0a37e6179f1e12c1e1ca6b9d740ffb78d1d259f9715ce19f08c48"
+ },
+ "reserved_ind.json": {
+  "dataset": "industrial_scientific",
+  "seqs_sha256": "cf4365c752928471e3ffa681fb73dd7e4b93441bab6bafe7c5ea464d0a714cfa",
+  "n_test": 10000,
+  "n_valid": 1000,
+  "test_sha256": "224a76cfaf1213837243f5eec1fcdb66f774e0a036dc87c1e784bf9ede4c53b1",
+  "valid_sha256": "65fe672129f856ccd1d48e955bda157ff8d35d21c1e57fb55e9158422f7f9af4"
+ },
+ "reserved_cold_vg.json": {
+  "dataset": "video_games_cold",
+  "seqs_sha256": "047775a48a4dbf63f0da4395a45b2f7b8cfd145e350eed2abea7e5a32cc89b29",
+  "n_test": 2547,
+  "n_valid": 0,
+  "test_sha256": "4aa27dd52fa1b5d015337a22fbcd7f6b7a3ab23ebe5cd7d9fb7c028612fe25b4",
+  "valid_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "reserved_cold_mi.json": {
+  "dataset": "musical_instruments_cold",
+  "seqs_sha256": "c69aa811e5cfd00e4db749b33774e29553c94dc88beb4128212cdc8686b6c6b5",
+  "n_test": 2568,
+  "n_valid": 0,
+  "test_sha256": "b455eab4a8f659e73f91ab903bbba77e0b5063598ae7eca7e338ca4c66fd1c64",
+  "valid_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "reserved_cold_steam.json": {
+  "dataset": "steam_cold",
+  "seqs_sha256": "166ddf16c01c8122c6973b889739a1017a8ac89ca78e893150f8a4fb871be0f3",
+  "n_test": 4949,
+  "n_valid": 0,
+  "test_sha256": "c60609b7fe9ecf415a7b124cff2f083ed91cbc4fd70b1af7f7a4c8e1d033c8c0",
+  "valid_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "reserved_cold_ind.json": {
+  "dataset": "industrial_scientific_cold",
+  "seqs_sha256": "5e9934b58f5cb12b4db9cb536440711d827c542786a2f36f229144bbb556174b",
+  "n_test": 2022,
+  "n_valid": 0,
+  "test_sha256": "5075f492b63f3d1c3014779926ec6f38751579248863e4bf89e5fe86dc6d23a5",
+  "valid_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "unseen_cds.json": {
+  "dataset": "cds_vinyl",
+  "seqs_sha256": "3e2110ba834f50aee757629ee75c6add4254886d8718031a02ace23378289727",
+  "n_test": 5000,
+  "n_valid": 1000,
+  "test_sha256": "f6bb9c1f7c7ef1df414171444fcc135bf9473a15b43c1d2aea2b274c28f4bbae",
+  "valid_sha256": "4a1bdd7e7d8ecd1d0cd0e0c24589d68f82d732764072f7ee683053f6fbc7a1c2"
+ },
+ "unseen_toys.json": {
+  "dataset": "toys_games",
+  "seqs_sha256": "83730af8aca92a3ee3a9494161571aa5abc2fe9c5ad4d0c0c781ebe574d355cd",
+  "n_test": 5000,
+  "n_valid": 1000,
+  "test_sha256": "64e7b980d2f7f4b34ca31656d76d03469c56175955a01fc2e00b430610716f8a",
+  "valid_sha256": "de6e0d64c7786c60c35d3e424c40d24210c69d4b27c4865c5dc4acbfd60736e1"
+ },
+ "unseen_sw.json": {
+  "dataset": "software",
+  "seqs_sha256": "78b9b72c63c676d44943e33ca8729420271d4f83639d47a47337da5c85a21e94",
+  "n_test": 5000,
+  "n_valid": 1000,
+  "test_sha256": "d736d6eb0279fea8d1055efa8ef5f6c93e773d4ea3c1fff4f6ca53cd5b7f39b3",
+  "valid_sha256": "1f99ed088fe0c09f5665e52da6cb31a6165083fa0d66f7f3fd74e43bb0a997df"
+ },
+ "unseen_baby.json": {
+  "dataset": "baby_products",
+  "seqs_sha256": "5e88f8d7ecade401f32f57e7150b0aec63eaea442446deb772453d33ec550c28",
+  "n_test": 5000,
+  "n_valid": 1000,
+  "test_sha256": "73c294205c33a7f6119463e646356a080dfcfdb34eaa6df2eb98ebcdf199e60b",
+  "valid_sha256": "06316a37666d87b94fd19e6519161337a33d435dd41f57e69d452779d228840f"
+ },
+ "unseen_pet.json": {
+  "dataset": "pet_supplies",
+  "seqs_sha256": "fba340895a075cf8e40365ad64c97aa047298062e52ea2441a751c0de5156c96",
+  "n_test": 5000,
+  "n_valid": 1000,
+  "test_sha256": "5b16015fd9bf3a9ccf9647a41d4c0ec2b8286e8722323cfc946b66e104b55eab",
+  "valid_sha256": "0ca8f2f0c12d9428d1b026cafae22d9287cafd5e3a15db16398edfa0f96932ce"
+ },
+ "unseen_groc.json": {
+  "dataset": "grocery_food",
+  "seqs_sha256": "fcf683a66671a78e6fa4b28cfa34c96bf442dbcd7c14dfe4d9addf00e39efe04",
+  "n_test": 5000,
+  "n_valid": 1000,
+  "test_sha256": "5822003e0f323dba6425f5c495f38639ebfeed156c7def4ac1b3fd6f9a296f3e",
+  "valid_sha256": "2bb6237581e89aa0c608e3515cda56461ef5efed46332ff7037347f53b9f5e70"
+ },
+ "unseen_arts.json": {
+  "dataset": "arts_crafts",
+  "seqs_sha256": "fa22650e2f8a5cd4a5f5fcfc607caf6cf8a925ae34d0d1b1030803d5e370f6fa",
+  "n_test": 5000,
+  "n_valid": 1000,
+  "test_sha256": "5905816cfe520ca7f130ff025e62830b1eb3263e4165ad2d43525f3f9735f916",
+  "valid_sha256": "e6b348b2e79033c0f42ab3d129f09b405308cc4e33d955fea26b69396814aefa"
+ },
+ "unseen_ml32m.json": {
+  "dataset": "ml32m",
+  "seqs_sha256": "d1dc86a0cf383b7bb2fef024603ea6534762abe14263674f83fbce604e26c1b6",
+  "n_test": 5000,
+  "n_valid": 1000,
+  "test_sha256": "125ad3bed03af48bfb9a5edd1fb3291666b3eec2f9ebff06928e9b576407039b",
+  "valid_sha256": "b248f487f3e2862e35fc2488c97cdd5e9755e84b2345c5ce3d042cd9c8a638c2"
+ },
+ "unseen_mind.json": {
+  "dataset": "mind_small",
+  "seqs_sha256": "6ae05b919c4c3148245a2fb60659e58ea5879c6e749b57c813735593e8c57411",
+  "n_test": 5000,
+  "n_valid": 1000,
+  "test_sha256": "6148587f46cb2e8785debab4fe1df17e03c7f77516c24e4bd2293ac30b1c9d31",
+  "valid_sha256": "efcfd5ef5b672dd674d9529b5eae0ebe09515c70a7469530a557f675745be867"
+ }
+}
