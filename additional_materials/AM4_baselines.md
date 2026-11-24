@@ -8,3 +8,21 @@ All trained baselines are our implementations, trained and evaluated with one pr
 - **SASRecF:** SASRec whose item representation adds embeddings of up to 12 catalogue attributes (brand, category, platform; on MovieLens-1M genres, director, cast and the other Wikidata properties).
 - **Training-free methods:** popularity; item kNN on co-occurrence within five items; sequential rules (Ludewig and Jannach, 2018) on the last one to three items; content kNN on the text vectors; and a mix of transitions and text (the items within two transition steps of the last two items, ranked by text similarity to the last item), after Han et al. (2026).
 - **PrepRec** (Wang et al., 2024): the authors' code and settings, trained on Video Games and on Musical Instruments (the timestamps of our Steam data are only an order, so its popularity periods cannot be built there), scored on the test users of the held-out domains over the whole catalogue. With the item popularity of the test period, as in its paper, it reaches 0.0123 NDCG@10 on Industrial and Scientific; with only the popularity known at the time of the last item of the history, a stricter setting, 0.0095.
+
+## NDCG@10 of the baselines on all users of each domain
+
+Whole catalogue, best configuration of the full grid, all users of each domain (the set from which the development users and the reserved users of the paper are drawn). Bold: best trained baseline of the column. This table was used only to choose the strongest trained baseline of each domain and the trained recommender of the pool. It is not used to compare with Decision4Rec: every comparison with Decision4Rec in the paper is made on the same sample of users for both systems (development or reserved users, see `splits/`). MovieLens-1M has two columns, with genres only (plain) and enriched. The methods that do not read item attributes (popularity, item kNN, sequential rules, GRU4Rec, SASRec, BERT4Rec) give the same value in both.
+
+| NDCG@10 ↑ | VG | MI | Steam | IND | ML-1M plain | ML-1M enriched |
+|---|---|---|---|---|---|---|
+| *Training-free methods* | | | | | | |
+| popularity | 0.0126 | 0.0133 | 0.0259 | 0.0088 | 0.0180 | 0.0180 |
+| item kNN | 0.0516 | 0.0314 | 0.0475 | 0.0231 | 0.1337 | 0.1337 |
+| sequential rules | 0.0494 | 0.0287 | 0.0461 | 0.0226 | 0.1425 | 0.1425 |
+| content kNN | 0.0155 | 0.0111 | 0.0159 | 0.0150 | 0.0274 | 0.0277 |
+| transitions and text | 0.0250 | 0.0142 | 0.0274 | 0.0170 | 0.0441 | 0.0370 |
+| *Trained in each domain* | | | | | | |
+| GRU4Rec | 0.0538 | 0.0318 | 0.0637 | 0.0217 | 0.1853 | **0.1853** |
+| SASRec | 0.0551 | 0.0338 | 0.0672 | 0.0262 | 0.1850 | 0.1850 |
+| BERT4Rec | 0.0500 | 0.0298 | 0.0604 | 0.0200 | 0.1623 | 0.1623 |
+| SASRecF | **0.0585** | **0.0365** | **0.0680** | **0.0296** | **0.1870** | 0.1828 |
